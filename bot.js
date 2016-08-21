@@ -70,10 +70,10 @@ class HelpController extends TelegramBaseController {
      * @param {Scope} $
      */
     helpHandler($) {
-        $.sendMessage('usage: \
-           /help  : this help \
-           /photo : send us a photo \
-           /ping  : verify bot health')
+        $.sendMessage("Usage: \n\
+                        /help  : this help \n\
+                        /ping  : verify bot health\n\
+                        /photo : send us a photo\n")
     }
 
     get routes() {
