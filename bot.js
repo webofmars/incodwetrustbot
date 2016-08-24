@@ -6,19 +6,40 @@ const TelegramBaseController = Telegram.TelegramBaseController
 const tg = new Telegram.Telegram(TGtoken)
 const dl = require('download-file')
 const dlurl = 'https://api.telegram.org/file/bot'
-const photodir = '/usr/src/app/photos'
+const photodir = './photos'
+const galleryUrl = 'http://incod.services.webofmars.com/gallery/'
 
-class PingController extends TelegramBaseController {
+/* Express web component */
+const express = require('express');
+const app = express();
+app.listen(3000, function () {
+  console.log('Started Express App on port 3000/tcp ...');
+});
+
+app.use('/gallery', require('node-gallery')({
+  staticFiles : photodir,
+  urlRoot : 'gallery',
+  title : 'InCodWeTrust Gallery'
+}));
+
+
+/* Telegram Controllers */
+class HelpController extends TelegramBaseController {
     /**
      * @param {Scope} $
      */
-    pingHandler($) {
-        $.sendMessage('pong')
+    helpHandler($) {
+        $.sendMessage("Usage: \n\
+ /help    : this help \n\
+ /ping    : verify bot health\n\
+ /photo   : send us a photo\n\
+ /gallery : display the gallery")
     }
 
     get routes() {
         return {
-            'ping': 'pingHandler'
+            'help': 'helpHandler',
+            'start': 'helpHandler'
         }
     }
 }
@@ -65,28 +86,37 @@ class DefaultController extends TelegramBaseController {
     }
 }
 
-class HelpController extends TelegramBaseController {
+class PingController extends TelegramBaseController {
     /**
      * @param {Scope} $
      */
-    helpHandler($) {
-        $.sendMessage("Usage: \n\
-                        /help  : this help \n\
-                        /ping  : verify bot health\n\
-                        /photo : send us a photo\n")
+    pingHandler($) {
+        $.sendMessage('pong')
     }
 
     get routes() {
         return {
-            'help': 'helpHandler',
-            'start': 'helpHandler'
+            'ping': 'pingHandler'
         }
     }
 }
 
+class GalleryController extends TelegramBaseController {
+  /**
+   * @param {Scope} $
+   */
+   handle($) {
+     $.sendMessage('[Gallerie Photos](' + galleryUrl +')', { parse_mode: 'Markdown' })
+  }
+}
+
+/* Telegram Routes */
 tg.router
     .when(['ping'], new PingController())
     .when(['photo'], new DefaultController())
     .when(['help'], new HelpController())
     .when(['start'], new HelpController())
+    .when(['gallery'], new GalleryController())
     .otherwise(new DefaultController())
+
+console.log('Listing for request on Telegram API ...')
