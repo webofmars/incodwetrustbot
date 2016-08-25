@@ -1,5 +1,7 @@
 'use strict'
 
+const UsersDB = require('./lib/UsersDB.js')
+
 const TGtoken = '193218920:AAG9G1zm9K1EFaIHt4HgCwv3AkM0JJozlYA'
 const Telegram = require('telegram-node-bot')
 const TelegramBaseController = Telegram.TelegramBaseController
@@ -8,6 +10,7 @@ const dl = require('download-file')
 const dlurl = 'https://api.telegram.org/file/bot'
 const photodir = './photos'
 const galleryUrl = 'http://incod.services.webofmars.com/gallery/'
+const users = new UsersDB()
 
 /* Express web component */
 const express = require('express');
@@ -22,13 +25,13 @@ app.use('/gallery', require('node-gallery')({
   title : 'InCodWeTrust Gallery'
 }));
 
-
 /* Telegram Controllers */
 class HelpController extends TelegramBaseController {
     /**
      * @param {Scope} $
      */
     helpHandler($) {
+        users.register($)
         $.sendMessage("Usage: \n\
  /help    : this help \n\
  /ping    : verify bot health\n\
@@ -110,6 +113,12 @@ class GalleryController extends TelegramBaseController {
   }
 }
 
+class ShowUsersController extends TelegramBaseController {
+  handle($) {
+    $.sendMessage('Users = ' + users.dump())
+  }
+}
+
 /* Telegram Routes */
 tg.router
     .when(['ping'], new PingController())
@@ -117,6 +126,7 @@ tg.router
     .when(['help'], new HelpController())
     .when(['start'], new HelpController())
     .when(['gallery'], new GalleryController())
+    .when(['susers'], new ShowUsersController())
     .otherwise(new DefaultController())
 
 console.log('Listing for request on Telegram API ...')
