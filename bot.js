@@ -1,16 +1,26 @@
+/******************************************************************************
+references :
+  - https://core.telegram.org/bots/api
+  - https://github.com/Naltox/telegram-node-bot
+  - http://nabovyan.xyz/telegram-node-bot/index.html
+*******************************************************************************/
+
 'use strict'
 
-const UsersDB = require('./lib/UsersDB.js')
+const UsersDB         = require('./lib/UsersDB.js')
+const SessionManager  = require('./lib/SessionManager.js')
+const dl              = require('download-file')
+const Telegram        = require('telegram-node-bot')
 
-const TGtoken = '193218920:AAG9G1zm9K1EFaIHt4HgCwv3AkM0JJozlYA'
-const Telegram = require('telegram-node-bot')
+const dlurl           = 'https://api.telegram.org/file/bot'
+const photodir        = './photos'
+const galleryUrl      = 'http://incod.services.webofmars.com/gallery/'
+const TGtoken         = '193218920:AAG9G1zm9K1EFaIHt4HgCwv3AkM0JJozlYA'
+
 const TelegramBaseController = Telegram.TelegramBaseController
-const tg = new Telegram.Telegram(TGtoken)
-const dl = require('download-file')
-const dlurl = 'https://api.telegram.org/file/bot'
-const photodir = './photos'
-const galleryUrl = 'http://incod.services.webofmars.com/gallery/'
-const users = new UsersDB()
+var tg              = new Telegram.Telegram(TGtoken)
+var users           = new UsersDB()
+var ActiveSessions  = new SessionManager()
 
 /* Express web component */
 const express = require('express');
@@ -25,12 +35,26 @@ app.use('/gallery', require('node-gallery')({
   title : 'InCodWeTrust Gallery'
 }));
 
+
+// FUNCTIONS
+
+/**
+ * @param {Scope} $
+ */
+function broadcast(scope, msg) {
+  console.log("Brodacat to " + JSON.stringify(ActiveSessions))
+  for (var i=0; i< ActiveSessions.sessions().length ; i++) {
+    tg.api.sendMessage(ActiveSessions.sessions()[i], msg)
+  }
+}
+
 /* Telegram Controllers */
 class HelpController extends TelegramBaseController {
     /**
      * @param {Scope} $
      */
     helpHandler($) {
+        ActiveSessions.add($.message.chat.id)
         users.register($)
         $.sendMessage("Usage: \n\
  /help    : this help \n\
@@ -48,6 +72,7 @@ class HelpController extends TelegramBaseController {
 }
 
 class DefaultController extends TelegramBaseController {
+
    /**
     * @param {Scope} $
     */
@@ -63,14 +88,17 @@ class DefaultController extends TelegramBaseController {
           function(daFile) {
             var url = dlurl + TGtoken + '/' + daFile.filePath
             var ext = /\..*$/.exec(daFile.filePath)
+            var photopath = photodir + '/' + $.message.from.username + '/' + daPhoto.fileId + ext
+            var photourl = galleryUrl + photopath
             console.log('    Downloading ' + url + '...')
             dl(url, {directory: photodir + '/' + $.message.from.username, filename: daPhoto.fileId + ext},
               function(err) {
                 if (err) { throw err; console.log("An error occured: " + JSON.stringify(err))}
                 else {
-                  console.log('    Saved to ' + photodir + '/' + $.message.from.username + '/' + daPhoto.fileId + ext)
+                  console.log('    Saved to ' + photopath)
                   console.log('')
                   $.sendMessage('Merci ' + $.message.from.username)
+                  broadcast($, 'Nouvelle photo de ' + $.message.from.username + "\n" + photourl)
                 }
               }
             )
@@ -113,9 +141,10 @@ class GalleryController extends TelegramBaseController {
   }
 }
 
-class ShowUsersController extends TelegramBaseController {
+class DebugController extends TelegramBaseController {
   handle($) {
-    $.sendMessage('Users = ' + users.dump())
+    $.sendMessage('Users    = ' + users.dump())
+    $.sendMessage('Sessions = ' + ActiveSessions.dump())
   }
 }
 
@@ -126,7 +155,7 @@ tg.router
     .when(['help'], new HelpController())
     .when(['start'], new HelpController())
     .when(['gallery'], new GalleryController())
-    .when(['susers'], new ShowUsersController())
+    .when(['debug'], new DebugController())
     .otherwise(new DefaultController())
 
 console.log('Listing for request on Telegram API ...')
