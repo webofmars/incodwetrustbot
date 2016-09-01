@@ -1,0 +1,10 @@
+tgbot:
+  scale: 1
+  health_check:
+    port: 3000
+    interval: 2000
+    initializing_timeout: 60000
+    unhealthy_threshold: 3
+    strategy: recreate
+    healthy_threshold: 2
+    response_timeout: 2000
