@@ -13,42 +13,81 @@ const dl              = require('download-file')
 const Telegram        = require('telegram-node-bot')
 
 const dlurl           = 'https://api.telegram.org/file/bot'
-const photodir        = './photos'
-const galleryUrl      = 'http://incod.services.webofmars.com/gallery/'
+const photodir        = __dirname + '/gallery/albums'
+//const galleryUrl      = 'http://incod.services.webofmars.com/gallery/'
+const galleryUrl      = 'http://localhost:3000/'
 const TGtoken         = '193218920:AAG9G1zm9K1EFaIHt4HgCwv3AkM0JJozlYA'
 
-const TelegramBaseController = Telegram.TelegramBaseController
+const TelegramBaseController              = Telegram.TelegramBaseController
+const TelegramBaseInlineQueryController   = Telegram.TelegramBaseInlineQueryController
+const TelegramBaseCallbackQueryController = Telegram.TelegramBaseCallbackQueryController
+const BaseScopeExtension                  = Telegram.BaseScopeExtension
+const InlineQueryResultLocation           = Telegram.InlineQueryResultLocation
+
 var tg              = new Telegram.Telegram(TGtoken)
 var users           = new UsersDB()
 var ActiveSessions  = new SessionManager()
 
+// TODO: rationalize
 /* Express web component */
 const express = require('express');
-const app = express();
+const app     = express();
+
+app.set('views', __dirname + '/gallery');
+app.set('view engine', 'ejs');
+app.use(express.static(__dirname + '/gallery/'));
 app.listen(3000, function () {
   console.log('Started Express App on port 3000/tcp ...');
 });
 
+// TODO: better views of gallery
 app.use('/gallery', require('node-gallery')({
-  staticFiles : photodir,
+  staticFiles : 'gallery/albums',
   urlRoot : 'gallery',
-  title : 'InCodWeTrust Gallery'
-}));
+  title : 'InCodWeTrust Gallery',
+  render: false
+}), function(req, res, next){
+  return res.render('gallery', { galleryHtml : req.html });
+});
 
-
-// FUNCTIONS
+class ToolsScopeExtension extends BaseScopeExtension {
 
 /**
  * @param {Scope} $
- */
-function broadcast(scope, msg) {
+ **/
+ broadcast(scope, msg) {
   console.log("Brodacat to " + JSON.stringify(ActiveSessions))
   for (var i=0; i< ActiveSessions.sessions().length ; i++) {
     tg.api.sendMessage(ActiveSessions.sessions()[i], msg)
   }
+ }
+
 }
 
 /* Telegram Controllers */
+
+class InlineQueryController extends TelegramBaseInlineQueryController {
+  /**
+  *@param: {InlineScope} $
+  **/
+  handle($) {
+    console.log("Je suis INLINE mec !")
+    // FIXME: dont work
+    $.answer({type: 'location', id: 'ICWT-001', latitude: 43.316501, longitude: 5.364755, title: 'Marseille c\'est là'})
+  }
+
+  chosenResult($) {
+
+  }
+}
+
+class CallbackQueryController extends TelegramBaseCallbackQueryController {
+  handle($) {
+    console.log("Youuuuoooooo call back !")
+    $.sendMessage('CallBack !')
+  }
+}
+
 class HelpController extends TelegramBaseController {
     /**
      * @param {Scope} $
@@ -98,21 +137,15 @@ class DefaultController extends TelegramBaseController {
                   console.log('    Saved to ' + photopath)
                   console.log('')
                   $.sendMessage('Merci ' + $.message.from.username)
-                  broadcast($, 'Nouvelle photo de ' + $.message.from.username + "\n" + photourl)
+                  $.broadcast($, 'Nouvelle photo de ' + $.message.from.username + "\n" + photourl)
                 }
               }
             )
           })
       }
       else {
-        console.log('- Unknown request received: ')
-        console.log('   Date : ' + $.message.date)
-        console.log('   Id   : ' + $.message.messageId)
-        console.log('   User : ' + $.message.from.username)
-        console.log('   Text : ' + $.message.text)
-        console.log('   Photo: ' + $.message.photo)
-        console.log(' ')
-        $.sendMessage('Désolé mais je comprends nib ...');
+        console.log('- Unknown request received from ' + $.message.from.username)
+        console.log(JSON.stringify($.message))
       }
     }
 }
@@ -148,6 +181,14 @@ class DebugController extends TelegramBaseController {
   }
 }
 
+class ScoresController extends TelegramBaseController {
+  handle($) {
+    $.sendMessage("*Voici les scores*:\n- Equipe Rouge: 7\n- Equipe Bleue: 2\n- Equipe Jaune: 1", { parse_mode: 'Markdown' })
+  }
+
+}
+
+
 /* Telegram Routes */
 tg.router
     .when(['ping'], new PingController())
@@ -156,6 +197,9 @@ tg.router
     .when(['start'], new HelpController())
     .when(['gallery'], new GalleryController())
     .when(['debug'], new DebugController())
+    .when(['scores'], new ScoresController())
+    .inlineQuery(new InlineQueryController())
+    .callbackQuery(new CallbackQueryController())
     .otherwise(new DefaultController())
 
 console.log('Listing for request on Telegram API ...')
