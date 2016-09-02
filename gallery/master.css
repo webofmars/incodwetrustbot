@@ -1,0 +1,224 @@
+* { margin: 0; padding: 0; }
+
+html
+{
+	color: #333333;
+	background-color: #ffffff;
+	font: normal 12px "Trebuchet MS", "Lucida Grande", Verdana, Sans-Serif;
+}
+
+/* Links */
+
+a { text-decoration: none; font-weight: bold; border-bottom: 1px dotted #333333; }
+
+a:link { color: #567ec4; border-bottom-color: #567ec4;}
+
+a:visited { color: #81a2c3; border-bottom-color: #81a2c3; }
+
+a:hover, a:active { color: #cc3333; border-bottom-style: solid; border-bottom-color: #cc3333; }
+
+/* Headings */
+
+h1, h2, h3, h4, h5, h6 { font-weight: normal; margin: 10px 0 15px; }
+
+h1 a, h2 a, h3 a, h4 a, h5 a, h6 a { font-weight: normal; border-bottom-width: 0; }
+
+h1 { font-size: 32px; }
+
+h2 { font-size: 28px; }
+
+h3 { font-size: 24px; }
+
+h4, h5, h6 { font-size: 20px; }
+
+/* Lists */
+
+ul, ol, dl
+{
+	margin: 15px 25px; 
+	line-height: 2.0em;
+}
+
+ol { margin-left: 30px; }
+
+ul { list-style-type: square; }
+
+/* Images */
+
+.drop-shadow
+{
+	float: left;
+	position: relative;
+	margin: 10px 3px 0 10px !important;
+	margin: 10px 3px 0 5px; 
+	background: transparent url(images/drop_shadow.png) bottom right no-repeat !important;
+	background: transparent url(images/drop_shadow_ie.gif) bottom right no-repeat;
+}
+
+.drop-shadow img
+{
+	padding: 4px;
+	display: block;
+	position: relative;
+	margin: -6px 6px 6px -6px;
+	background-color: #ffffff;
+	border: 1px solid #a9a9a9;
+}
+
+.drop-shadow p
+{
+	right: 11px;
+	bottom: 0px;
+	color: #eeeeee;
+	padding: 5px 10px;
+	position: absolute; 
+	background-color: #2e333b;
+	border-top: 1px solid #111111;
+}
+
+/* Other Html Elements */
+
+blockquote, pre 
+{ 
+	padding: 10px;
+	color: #555555;
+	margin: 20px 30px; 
+	background-color: #f9f9f9; 
+	border: 1px solid #e9e9e9;
+}
+
+code { font-family: Consolas, Monaco, Verdana, "Courier New"; font-size: .93em; }
+
+abbr, acronym, cite { border-bottom: 1px dotted #333333; cursor: help; }
+
+hr { visibility: hidden; height: 1px; clear: both; }
+
+/* Structure */
+
+body { }
+
+#header { background-color: #363633; border-bottom: 1px solid #000000; }
+
+#navigation 
+{ 
+	float: left; 
+	clear: both; 
+	width: 100%; 
+	background-color: #eeeeee; 
+	border-bottom: 1px solid #dddddd;
+}
+
+#content-wrapper
+{
+	clear: both;
+	width: 750px;
+	margin: 0 auto;
+	text-align: center;
+}
+
+#content { float: left; padding: 20px 0; }
+
+#footer 
+{ 
+	float: left; 
+	clear: both; 
+	width: 100%; 
+	color: #999999;
+	background-color: #363633; 
+}
+
+/* Header */
+
+#header h1 { font-size: 13px; margin: 0; padding: 20px 25px; }
+
+#header a { border-bottom-width: 0; color: #ffffff; }
+
+/* Navigation */
+
+#navigation ul { margin: 0; padding: 0; list-style-type: none; float: left; }
+
+#navigation li { float: left; }
+
+#navigation a
+{
+	float: left;
+	display: block;
+	color: #567ec4; 
+	padding: 5px 8px;
+	border-bottom-width: 0; 
+}
+
+#navigation a:hover, #navigation a:active 
+{ 
+	color: #000000; 
+	background: #73a340 url(images/menu_hover.jpg) top left repeat-x; 
+}
+
+#navigation li.active a
+{
+	color: #000000; 
+	background: #73a340 url(images/menu_hover.jpg) top left repeat; 
+}
+
+/* Content */
+
+#content p
+{
+	float: left;
+	margin: 10px 25px;
+}
+
+#content a.drop-shadow p { margin: 0; bottom: 10px; }
+
+a.drop-shadow { border-bottom-width: 0; font-weight: normal; }
+
+a.dropshadow:hover, a.dropshadow:active { background-color: #eeeeee; }
+
+/* Footer */
+
+#footer a { color: #81a2c3; border-bottom-color: #81a2c3; }
+
+#footer a:hover, #footer a:active { color: #9ebb33; border-bottom-color: #9ebb33; }
+
+#meta div
+{ 
+	padding: 0;
+	width: 25%;
+	float: left;
+	margin: 10px 50px 0;
+}
+
+#meta h3 
+{
+	font-size: 12px;
+	margin-left: 25px;
+	color: #9ebb33;
+	letter-spacing: 0.1em;
+	text-transform: uppercase;
+}
+
+#meta li
+{
+	list-style-image: url(images/pushpin.gif);
+}
+
+#meta li a
+{
+	display: block;
+	padding: 3px 8px;
+	border-bottom-color: #585855;
+}
+
+#meta li a:hover, #meta li a:active
+{
+	background-color: #474744;
+	border-bottom-color: #585855;
+}
+
+#copyright 
+{ 
+	border-top: 1px solid #1c1c1c;
+	background-color: #252522; 
+	padding: 10px; 
+	clear: both;
+} 
