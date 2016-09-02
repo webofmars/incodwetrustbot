@@ -6,7 +6,7 @@ tgbot:
     io.rancher.scheduler.affinity:host_label: owner=fred
   tty: true
   log_opt: {}
-  image: webofmars/incodwetrustbot:latest
+  image: webofmars/incodwetrustbot:develop
   volumes:
   - /var/apps/incodwetrustbot/photos:/usr/src/app/photos
   stdin_open: true
