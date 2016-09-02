@@ -4,7 +4,6 @@ references :
   - https://github.com/Naltox/telegram-node-bot
   - http://nabovyan.xyz/telegram-node-bot/index.html
 *******************************************************************************/
-
 'use strict'
 
 const UsersDB         = require('./lib/UsersDB.js')
@@ -13,9 +12,8 @@ const dl              = require('download-file')
 const Telegram        = require('telegram-node-bot')
 
 const dlurl           = 'https://api.telegram.org/file/bot'
-const photodir        = __dirname + '/gallery/albums'
-//const galleryUrl      = 'http://incod.services.webofmars.com/gallery/'
-const galleryUrl      = 'http://localhost:3000/'
+const photodir        = 'photos'
+const galleryUrl      = 'http://icwt.services.webofmars.com/gallery/'
 const TGtoken         = '193218920:AAG9G1zm9K1EFaIHt4HgCwv3AkM0JJozlYA'
 
 const TelegramBaseController              = Telegram.TelegramBaseController
@@ -33,16 +31,16 @@ var ActiveSessions  = new SessionManager()
 const express = require('express');
 const app     = express();
 
-app.set('views', __dirname + '/gallery');
+app.set('views', __dirname + '/node-gallery/views');
 app.set('view engine', 'ejs');
-app.use(express.static(__dirname + '/gallery/'));
+app.use(express.static('./node-gallery/resources'));
 app.listen(3000, function () {
   console.log('Started Express App on port 3000/tcp ...');
 });
 
 // TODO: better views of gallery
 app.use('/gallery', require('node-gallery')({
-  staticFiles : 'gallery/albums',
+  staticFiles : photodir,
   urlRoot : 'gallery',
   title : 'InCodWeTrust Gallery',
   render: false
@@ -50,12 +48,13 @@ app.use('/gallery', require('node-gallery')({
   return res.render('gallery', { galleryHtml : req.html });
 });
 
-class ToolsScopeExtension extends BaseScopeExtension {
+class BotTools {
 
 /**
- * @param {Scope} $
+ * @param {Scope} scope
+ * @param {string} msg
  **/
- broadcast(scope, msg) {
+ static broadcast(scope, msg) {
   console.log("Brodacat to " + JSON.stringify(ActiveSessions))
   for (var i=0; i< ActiveSessions.sessions().length ; i++) {
     tg.api.sendMessage(ActiveSessions.sessions()[i], msg)
@@ -99,7 +98,8 @@ class HelpController extends TelegramBaseController {
  /help    : this help \n\
  /ping    : verify bot health\n\
  /photo   : send us a photo\n\
- /gallery : display the gallery")
+ /gallery : display the gallery\n\
+ /scores  : display the current teams scores")
     }
 
     get routes() {
@@ -127,17 +127,18 @@ class DefaultController extends TelegramBaseController {
           function(daFile) {
             var url = dlurl + TGtoken + '/' + daFile.filePath
             var ext = /\..*$/.exec(daFile.filePath)
-            var photopath = photodir + '/' + $.message.from.username + '/' + daPhoto.fileId + ext
+            var filename = /[^\/]+$/.exec(daFile.filePath)
+            var photopath = photodir + '/' + $.message.from.username + '/' + filename
             var photourl = galleryUrl + photopath
             console.log('    Downloading ' + url + '...')
-            dl(url, {directory: photodir + '/' + $.message.from.username, filename: daPhoto.fileId + ext},
+            dl(url, {directory: photodir + '/' + $.message.from.username, filename: filename},
               function(err) {
                 if (err) { throw err; console.log("An error occured: " + JSON.stringify(err))}
                 else {
                   console.log('    Saved to ' + photopath)
                   console.log('')
                   $.sendMessage('Merci ' + $.message.from.username)
-                  $.broadcast($, 'Nouvelle photo de ' + $.message.from.username + "\n" + photourl)
+                  BotTools.broadcast($, 'Nouvelle photo de ' + $.message.from.username + "\n" + photourl)
                 }
               }
             )
