@@ -1,12 +1,9 @@
 tgbot:
-  ports:
-  - 3000/tcp
-  log_driver: ''
   labels:
     io.rancher.scheduler.affinity:host_label: owner=fred
-  tty: true
-  log_opt: {}
+    io.rancher.container.pull_image: always
   image: webofmars/incodwetrustbot:develop
   volumes:
   - /var/apps/incodwetrustbot/photos:/usr/src/app/photos
   stdin_open: true
+  tty: true
