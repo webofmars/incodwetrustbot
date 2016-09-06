@@ -13,7 +13,7 @@ const Telegram        = require('telegram-node-bot')
 
 const dlurl           = 'https://api.telegram.org/file/bot'
 const photodir        = 'photos'
-const galleryUrl      = 'http://icwt.services.webofmars.com/gallery/'
+const galleryUrl      = 'https://icwt.services.webofmars.com/gallery'
 const TGtoken         = '193218920:AAG9G1zm9K1EFaIHt4HgCwv3AkM0JJozlYA'
 
 const TelegramBaseController              = Telegram.TelegramBaseController
@@ -21,6 +21,7 @@ const TelegramBaseInlineQueryController   = Telegram.TelegramBaseInlineQueryCont
 const TelegramBaseCallbackQueryController = Telegram.TelegramBaseCallbackQueryController
 const BaseScopeExtension                  = Telegram.BaseScopeExtension
 const InlineQueryResultLocation           = Telegram.InlineQueryResultLocation
+const InputFile                           = Telegram.InputFile
 
 var tg              = new Telegram.Telegram(TGtoken)
 var users           = new UsersDB()
@@ -54,14 +55,28 @@ class BotTools {
  * @param {Scope} scope
  * @param {string} msg
  **/
- static broadcast(scope, msg) {
-  console.log("Brodacat to " + JSON.stringify(ActiveSessions))
-  for (var i=0; i< ActiveSessions.sessions().length ; i++) {
-    tg.api.sendMessage(ActiveSessions.sessions()[i], msg)
-  }
+ static broadcastText(scope, msg) {
+   console.log("Brodacat to " + JSON.stringify(ActiveSessions))
+   for (var i=0; i< ActiveSessions.sessions().length ; i++) {
+     tg.api.sendMessage(ActiveSessions.sessions()[i], msg)
+   }
  }
 
+  /**
+  * @param {Scope} scope
+  * @param {string} msg
+  * @param {string} file
+  **/
+  static broadcastImg(scope, msg, file) {
+    console.log("Brodacat to " + JSON.stringify(ActiveSessions))
+    for (var i=0; i< ActiveSessions.sessions().length ; i++) {
+      tg.api.sendMessage(ActiveSessions.sessions()[i], msg)
+      tg.api.sendPhoto(ActiveSessions.sessions()[i], InputFile.byFilePath(file))
+    }
+  }
+
 }
+
 
 /* Telegram Controllers */
 
@@ -129,7 +144,8 @@ class DefaultController extends TelegramBaseController {
             var ext = /\..*$/.exec(daFile.filePath)
             var filename = /[^\/]+$/.exec(daFile.filePath)
             var photopath = photodir + '/' + $.message.from.username + '/' + filename
-            var photourl = galleryUrl + photopath
+            var photourlpath = '/' + $.message.from.username + '/photo/' + /^(.*)\..*$/.exec(filename)[1]
+            var photourl = galleryUrl + photourlpath
             console.log('    Downloading ' + url + '...')
             dl(url, {directory: photodir + '/' + $.message.from.username, filename: filename},
               function(err) {
@@ -138,7 +154,7 @@ class DefaultController extends TelegramBaseController {
                   console.log('    Saved to ' + photopath)
                   console.log('')
                   $.sendMessage('Merci ' + $.message.from.username)
-                  BotTools.broadcast($, 'Nouvelle photo de ' + $.message.from.username + "\n" + photourl)
+                  BotTools.broadcastImg($, 'Nouvelle photo de ' + $.message.from.username + "\n" + photourl + "\n", photopath)
                 }
               }
             )
