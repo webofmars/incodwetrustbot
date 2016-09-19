@@ -7,3 +7,33 @@ tgbot:
   - /var/apps/incodwetrustbot/photos:/usr/src/app/photos
   stdin_open: true
   tty: true
+  links:
+    - redis
+
+redis:
+  labels:
+    io.rancher.scheduler.affinity:host_label: owner=fred
+    io.rancher.container.pull_image: always
+  image: redis
+  entrypoint:
+    - 'redis-server'
+    - '--appendonly'
+    - 'yes'
+  volumes:
+  - /var/apps/incodwetrustbot/redis:/data
+  stdin_open: true
+  tty: true
+
+  admin:
+    labels:
+      io.rancher.scheduler.affinity:host_label: owner=fred
+      io.rancher.container.pull_image: always
+    image: tenstartups/redis-commander
+    links:
+      - redis
+    stdin_open: true
+    tty: true
+    entrypoint:
+      - 'redis-commander'
+      - '--redis-host'
+      - 'redis'

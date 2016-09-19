@@ -1,0 +1,39 @@
+tgbot:
+  build: ../
+  volumes:
+  - ../lib:/usr/src/app/lib
+  - ../bot.js:/usr/src/app/bot.js
+  - ../node-gallery:/usr/src/app/node-gallery
+  - ../package.json:/usr/src/app/package.json
+  stdin_open: true
+  tty: true
+  ports:
+    - 3000:3000
+    - 5858:5858
+    - 8080:8080
+  links:
+    - redis
+
+redis:
+  image: redis
+  entrypoint:
+     - 'redis-server'
+     - '--appendonly'
+     - 'yes'
+  volumes:
+  - ../redis:/data
+  stdin_open: true
+  tty: true
+
+admin:
+  image: tenstartups/redis-commander
+  links:
+    - redis
+  stdin_open: true
+  tty: true
+  ports:
+    - 8081:8081
+  entrypoint:
+    - 'redis-commander'
+    - '--redis-host'
+    - 'redis'

@@ -8,3 +8,25 @@ tgbot:
     strategy: recreate
     healthy_threshold: 2
     response_timeout: 2000
+
+redis:
+  scale: 1
+  health_check:
+    port: 6379
+    interval: 2000
+    initializing_timeout: 60000
+    unhealthy_threshold: 3
+    strategy: recreate
+    healthy_threshold: 2
+    response_timeout: 2000
+
+admin:
+  scale: 1
+  health_check:
+    port: 8081
+    interval: 2000
+    initializing_timeout: 60000
+    unhealthy_threshold: 3
+    strategy: recreate
+    healthy_threshold: 2
+    response_timeout: 2000
