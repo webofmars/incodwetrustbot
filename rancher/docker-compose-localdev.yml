@@ -2,11 +2,12 @@ tgbot:
   build: ../
   volumes:
   - ../lib:/usr/src/app/lib
+  - ../public:/usr/src/app/public
   - ../bot.js:/usr/src/app/bot.js
   - ../node-gallery:/usr/src/app/node-gallery
   - ../package.json:/usr/src/app/package.json
   stdin_open: true
-  tty: true
+  tty: false
   ports:
     - 3000:3000
     - 5858:5858
@@ -23,14 +24,14 @@ redis:
   volumes:
   - ../redis:/data
   stdin_open: true
-  tty: true
+  tty: false
 
 admin:
   image: tenstartups/redis-commander
   links:
     - redis
   stdin_open: true
-  tty: true
+  tty: false
   ports:
     - 8081:8081
   entrypoint:

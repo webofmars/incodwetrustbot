@@ -4,6 +4,7 @@
   "description": "In Cod We Trust is a bewelcome (bewelcome.org) event, taking place in Marseille, France. This bot will interract with the participants for the great photo contest",
   "main": "]",
   "dependencies": {
+    "dotenv": "^2.0.0",
     "download-file": "^0.1.5",
     "ejs": "2.0.8",
     "express": "^4.14.0",
@@ -11,8 +12,7 @@
     "redis": "^2.6.2",
     "telegram-node-bot": "^3.0.12"
   },
-  "devDependencies": {
-  },
+  "devDependencies": {},
   "scripts": {
     "start": "node bot.js"
   },
