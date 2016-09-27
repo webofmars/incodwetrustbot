@@ -3,6 +3,7 @@ tgbot:
   volumes:
     - ../lib:/usr/src/app/lib
     - ../public:/usr/src/app/public
+    - ../games:/usr/src/app/games
     - ../bot.js:/usr/src/app/bot.js
     - ../node-gallery:/usr/src/app/node-gallery
     - ../package.json:/usr/src/app/package.json
@@ -15,7 +16,7 @@ tgbot:
     REDIS_HOST: "redis"
     REDIS_PORT: "6379"
     EVENT_DOC_URL: "https://s3.eu-central-1.amazonaws.com/incodwetrust-statics/Prog-InCodWeTrust-EN-2016-v1.pdf"
-    EVENT_GAMES_PREFIX: "http://localhost:3000/gallery/event-"
+    EVENT_GAMES_PREFIX: "http://localhost:3000/games/"
   ports:
     - 3000:3000
     - 5858:5858

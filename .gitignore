@@ -42,6 +42,7 @@ photos/
 
 # redis data
 redis/
+games/
 
 # env vars
 .env
