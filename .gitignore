@@ -39,3 +39,9 @@ jspm_packages
 
 # node-gallery dir
 photos/
+
+# redis data
+redis/
+
+# env vars
+.env
