@@ -6,13 +6,10 @@ references :
 *******************************************************************************/
 'use strict'
 
-require('dotenv').config()
-
 const UsersDB           = require('./lib/UsersDB.js');
 const SessionsManager   = require('./lib/SessionsManager.js');
 const dl                = require('download-file');
 const Telegram          = require('telegram-node-bot');
-const json2md           = require('json2md');
 const Redis             = require('redis');
 
 const dlurl             = 'https://api.telegram.org/file/bot'
@@ -29,7 +26,6 @@ const TelegramBaseCallbackQueryController = Telegram.TelegramBaseCallbackQueryCo
 const BaseScopeExtension                  = Telegram.BaseScopeExtension
 const InlineQueryResultLocation           = Telegram.InlineQueryResultLocation
 const InputFile                           = Telegram.InputFile
-
 
 console.log("INFO: " + JSON.stringify(process.versions));
 

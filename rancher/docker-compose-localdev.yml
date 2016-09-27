@@ -8,6 +8,13 @@ tgbot:
   - ../package.json:/usr/src/app/package.json
   stdin_open: true
   tty: false
+  environement:
+    - GALLERY_URL: "http://localhost:3000/gallery"
+    - PHOTOS_DIRECTORY: "photos"
+    - TELEGRAM_BOT_TOKEN: "193218920:AAG9G1zm9K1EFaIHt4HgCwv3AkM0JJozlYA"
+    - REDIS_HOST: "redis"
+    - REDIS_PORT: "6379"
+    - EVENT_DOC_URL: "https://s3.eu-central-1.amazonaws.com/incodwetrust-statics/Prog-InCodWeTrust-EN-2016-v1.pdf"
   ports:
     - 3000:3000
     - 5858:5858
