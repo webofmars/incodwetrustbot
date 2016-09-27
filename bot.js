@@ -13,12 +13,15 @@ const Telegram          = require('telegram-node-bot');
 const Redis             = require('redis');
 
 const dlurl             = 'https://api.telegram.org/file/bot'
-const galleryUrl        = process.env.GALLERY_URL
-const photodir          = process.env.PHOTOS_DIRECTORY
-const TGtoken           = process.env.TELEGRAM_BOT_TOKEN
-const redisHost         = process.env.REDIS_HOST
-const redisPort         = process.env.REDIS_PORT
-const eventDocUrl       = process.env.EVENT_DOC_URL
+const galleryUrl        = process.env.GALLERY_URL         || 'http://localhost:3000/gallery'
+const photodir          = process.env.PHOTOS_DIRECTORY    || 'photos'
+const TGtoken           = process.env.TELEGRAM_BOT_TOKEN  || 'xxxxxxxxxxxx:yyyyyyyyyyyyyyyy'
+const redisHost         = process.env.REDIS_HOST          || 'redis'
+const redisPort         = process.env.REDIS_PORT          || '6379'
+const eventDocUrl       = process.env.EVENT_DOC_URL       || 'http://www.pipo.com/'
+const eventGamesPrefix  = process.env.EVENT_GAMES_PREFIX  || "http://localhost:3000/gallery/event"
+const admins            = ["fredlight", "Marsary", "KrisTLG", "VincentNOYE", "Orianne55"]
+const version           = "0.0.7"
 
 const TelegramBaseController              = Telegram.TelegramBaseController
 const TelegramBaseInlineQueryController   = Telegram.TelegramBaseInlineQueryController
@@ -131,6 +134,7 @@ class HelpController extends TelegramBaseController {
         /contacts - show me the orgas contact \
         /places - show me the meeting point on a map \
         /programm - send me again the programm document \
+        /version - show the bot version \
         /xxxxxxxx - there is some hidden commands ... find it :-)");
     }
 }
@@ -254,6 +258,13 @@ class ProgrammController extends TelegramBaseController {
   }
 }
 
+class VersionController extends TelegramBaseController {
+  handle($) {
+    BotTools.UsersAndSessionsRegister($)
+    $.sendMessage('Version ' + version)
+  }
+}
+
 class SetScoreController extends TelegramBaseController {
 
   handle($) {
@@ -261,7 +272,12 @@ class SetScoreController extends TelegramBaseController {
       BotTools.UsersAndSessionsRegister($)
 
       console.log("SetScoreController: user="  + $.message.from.username);
-      // TODO: add security check
+      if (admins.indexOf($.message.from.username) == -1) {
+        console.log("Unauthorized access: " + $.message.from.username)
+        $.sendMessage("You are not authorized to call this command !")
+        return false;
+      }
+
       console.log("SetScoreController: team="  + $.query.team);
       console.log("SetScoreController: delta=" + $.query.delta);
 
@@ -279,6 +295,26 @@ class SetScoreController extends TelegramBaseController {
   }
 }
 
+class StartGameController extends TelegramBaseController {
+
+  handle($) {
+      console.log("+++ StartGameController")
+      BotTools.UsersAndSessionsRegister($)
+
+      console.log("StartGameController: user="  + $.message.from.username);
+      if (admins.indexOf($.message.from.username) == -1) {
+        console.log("Unauthorized access: " + $.message.from.username)
+        $.sendMessage("You are not authorized to call this command !")
+        return false;
+      }
+
+      console.log("StartGameController: number="  + $.query.number);
+      BotTools.broadcastText($, eventGamesPrefix + $.query.number);
+  }
+
+}
+
+
 /* Telegram Routes */
 /* Cut and paste this list on BotFather /setcommands
 start - start playing with me
@@ -289,6 +325,7 @@ scores - show me the event scores
 contacts - show me the orgas contact
 places - show me the meeting point on a map
 programm - send me again the programm document
+version - show the bot version
 xxxxxxxx - there is some hidden commands ... find it :-)
 */
 tg.router
@@ -301,11 +338,11 @@ tg.router
     .when(['/contacts'], new ContactsController())
     .when(['/places'], new PlacesController())
     .when(['/programm'], new ProgrammController())
+    .when(['/version'], new VersionController())
     // Hidden functions
     .when(['/debug'], new DebugController())
     .when(['/setscore :team :delta'], new SetScoreController())
-    //.inlineQuery(new InlineQueryController())
-    //.callbackQuery(new CallbackQueryController())
+    .when(['/startevent :number'], new StartGameController())
     .otherwise(new DefaultController())
 
 console.log('Listing for request on Telegram API ...')
