@@ -20,8 +20,9 @@ const redisHost         = process.env.REDIS_HOST          || 'redis'
 const redisPort         = process.env.REDIS_PORT          || '6379'
 const eventDocUrl       = process.env.EVENT_DOC_URL       || 'http://www.pipo.com/'
 const eventGamesPrefix  = process.env.EVENT_GAMES_PREFIX  || "http://localhost:3000/games/"
+const playlistUrl       = process.env.PLAYLIST_URL        || 'http://www.deezer.com/'
 const admins            = ["fredlight", "Marsary", "KrisTLG", "VincentNOYE", "Orianne55"]
-const version           = "0.0.9"
+const version           = "0.0.9b"
 
 const TelegramBaseController              = Telegram.TelegramBaseController
 const TelegramBaseInlineQueryController   = Telegram.TelegramBaseInlineQueryController
@@ -154,16 +155,18 @@ class HelpController extends TelegramBaseController {
     handle($) {
         BotTools.UsersAndSessionsRegister($)
         $.sendMessage("Usage: \n\
-        /start - start playing with me \n \
-        /help - display help message \n \
-        /ping - check if i'am still alive ;-) \n \
-        /gallery - show me the onlmine photo gallery of the event \n \
-        /scores - show me the event scores \n \
-        /contacts - show me the orgas contact \n \
-        /places - show me the meeting point on a map \n \
-        /programm - send me again the programm document \n \
-        /version - show the bot version \n \
-        /xxxxxxxx - there is some hidden commands ... find it :-)");
+        /start : start playing with me \n \
+        /help : display help message \n \
+        /ping : check if i'am still alive ;-) \n \
+        /photo : send me a photo \n \
+        /gallery : show me the onlmine photo gallery of the event \n \
+        /scores : show me the event scores \n \
+        /contacts : show me the orgas contact \n \
+        /places : show me the meeting point on a map \n \
+        /programm : send me again the programm document \n \
+        /playlist : send me some good sound of Marseille \n \
+        /version : show the bot version \n \
+        /xxxxxxxx : there is some hidden commands ... find it :-)");
     }
 }
 
@@ -255,7 +258,7 @@ class ProgrammController extends TelegramBaseController {
   handle($) {
     BotTools.UsersAndSessionsRegister($)
     $.sendMessage('Please wait until the download is finished...')
-    $.sendDocument(InputFile.byUrl(eventDocUrl, 'Prog-InCodWeTrust-EN-2016-v1.pdf'))
+    $.sendDocument(InputFile.byUrl(eventDocUrl, 'ICWT.pdf'))
   }
 }
 
@@ -359,11 +362,18 @@ class PhotoController extends TelegramBaseController {
   }
 }
 
+class PlaylistController extends TelegramBaseController {
+  handle($) {
+    $.sendMessage(playlistUrl);
+  }
+}
+
 /* Telegram Routes */
 /* Cut and paste this list on BotFather /setcommands
 start - start playing with me
 help - display help message
 ping - check if i'am still alive ;-)
+photo - send me a photo
 gallery - show me the onlmine photo gallery of the event
 scores - show me the event scores
 contacts - show me the orgas contact
@@ -382,6 +392,7 @@ tg.router
     .when([/^\/contacts$/], new ContactsController())
     .when([/^\/places$/], new PlacesController())
     .when([/^\/programm$/], new ProgrammController())
+    .when([/^\/playlist$/], new PlaylistController())
     .when([/^\/version$/], new VersionController())
     // Hidden functions
     .when([/^\/debug$/], new DebugController())
