@@ -5,7 +5,6 @@ tgbot:
   image: webofmars/incodwetrustbot:develop
   volumes:
     - /var/apps/incodwetrustbot/photos:/usr/src/app/photos
-    - /var/apps/incodwetrustbot/games:/usr/src/app/games
   stdin_open: true
   tty: false
   environment:
@@ -14,8 +13,9 @@ tgbot:
     TELEGRAM_BOT_TOKEN: "193218920:AAG9G1zm9K1EFaIHt4HgCwv3AkM0JJozlYA"
     REDIS_HOST: "redis"
     REDIS_PORT: "6379"
-    EVENT_DOC_URL: "https://s3.eu-central-1.amazonaws.com/incodwetrust-statics/Prog-InCodWeTrust-EN-2016-v1.pdf"
-    EVENT_GAMES_PREFIX: "https://icwt.services.webofmars.com/games/"
+    EVENT_DOC_URL: "https://s3.eu-central-1.amazonaws.com/incodwetrust-statics/Prog-InCodWeTrust-EN-2016-v6.pdf"
+    EVENT_GAMES_PREFIX: "https://icwt.services.webofmars.com/gallery/games/"
+    PLAYLIST_URL: 'http://www.deezer.com/playlist/61829027'
   links:
     - redis
 
