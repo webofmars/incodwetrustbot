@@ -19,9 +19,9 @@ const TGtoken           = process.env.TELEGRAM_BOT_TOKEN  || 'xxxxxxxxxxxx:yyyyy
 const redisHost         = process.env.REDIS_HOST          || 'redis'
 const redisPort         = process.env.REDIS_PORT          || '6379'
 const eventDocUrl       = process.env.EVENT_DOC_URL       || 'http://www.pipo.com/'
-const eventGamesPrefix  = process.env.EVENT_GAMES_PREFIX  || "http://localhost:3000/gallery/event"
+const eventGamesPrefix  = process.env.EVENT_GAMES_PREFIX  || "http://localhost:3000/games/"
 const admins            = ["fredlight", "Marsary", "KrisTLG", "VincentNOYE", "Orianne55"]
-const version           = "0.0.7"
+const version           = "0.0.8"
 
 const TelegramBaseController              = Telegram.TelegramBaseController
 const TelegramBaseInlineQueryController   = Telegram.TelegramBaseInlineQueryController
@@ -31,6 +31,7 @@ const InlineQueryResultLocation           = Telegram.InlineQueryResultLocation
 const InputFile                           = Telegram.InputFile
 
 console.log("INFO: " + JSON.stringify(process.versions));
+console.dir("INFO: TG BOT TOKEN: " + TGtoken)
 
 var tg              = new Telegram.Telegram(TGtoken);
 var users           = new UsersDB();
@@ -123,18 +124,18 @@ class BotTools {
  */
 class HelpController extends TelegramBaseController {
 
-    helpHandler() {
+    handle($) {
         BotTools.UsersAndSessionsRegister($)
         $.sendMessage("Usage: \n\
-        /start - start playing with me \
-        /help - display help message \
-        /ping - check if i'am still alive ;-) \
-        /gallery - show me the onlmine photo gallery of the event \
-        /scores - show me the event scores \
-        /contacts - show me the orgas contact \
-        /places - show me the meeting point on a map \
-        /programm - send me again the programm document \
-        /version - show the bot version \
+        /start - start playing with me \n \
+        /help - display help message \n \
+        /ping - check if i'am still alive ;-) \n \
+        /gallery - show me the onlmine photo gallery of the event \n \
+        /scores - show me the event scores \n \
+        /contacts - show me the orgas contact \n \
+        /places - show me the meeting point on a map \n \
+        /programm - send me again the programm document \n \
+        /version - show the bot version \n \
         /xxxxxxxx - there is some hidden commands ... find it :-)");
     }
 }
@@ -183,18 +184,9 @@ class DefaultController extends TelegramBaseController {
 }
 
 class PingController extends TelegramBaseController {
-    /**
-     * @param {Scope} $
-     */
-    pingHandler($) {
+    handle($) {
         BotTools.UsersAndSessionsRegister($)
         $.sendMessage('pong')
-    }
-
-    get routes() {
-        return {
-            'ping': 'pingHandler'
-        }
     }
 }
 
@@ -244,7 +236,7 @@ class PlacesController extends TelegramBaseController {
     BotTools.UsersAndSessionsRegister($)
     $.sendVenue(43.298829, 5.383786, "Kiosque a musique - Friday 30th - 19h30", "49 allée Léon Gambetta")
     $.sendVenue(43.297334, 5.365755, "Place de lenche - Saturday 1st - 9h30", "Place de lenche")
-    $.sendVenue(43.271464, 5.392409, "Metro Station - Saturday 1st - 10h00", "16 boulevard Michelet")
+    $.sendVenue(43.286325, 5.383802, "Castellane Metro Station - Saturday 1st - 10h00", "Place Castellane")
     $.sendVenue(43.295384, 5.387426, "Brasserie le 31 - Sunday 2nd - 10h30", "27 place Jean Jaurès")
     $.sendVenue(43.295793, 5.375202, "Metro Vieux Port, Place Gabriel Péri - Station LeVelo - Sunday 2nd - 10h30", "1 Rue Reine Elisabeth")
   }
@@ -308,12 +300,32 @@ class StartGameController extends TelegramBaseController {
         return false;
       }
 
-      console.log("StartGameController: number="  + $.query.number);
-      BotTools.broadcastText($, eventGamesPrefix + $.query.number);
+      console.log("StartGameController: number="  + $.query.gameid);
+      if (typeof $.query.gameid !== 'undefined') {
+        console.log("++ starting game " + $.query.gameid)
+        app.use('/games/' + $.query.gameid, require('node-gallery')({
+          staticFiles : 'games/' + $.query.gameid,
+          urlRoot : 'games',
+          title : 'Game ' + $.query.gameid
+        }));
+        BotTools.broadcastText($, eventGamesPrefix + $.query.gameid);
+      }
   }
-
 }
 
+class FunChatouilleController extends TelegramBaseController {
+  handle($) {
+    BotTools.UsersAndSessionsRegister($)
+    BotTools.broadcastText($, "HI HI HI ! please stop !")
+  }
+}
+
+class FunCodController extends TelegramBaseController {
+  handle($) {
+    BotTools.UsersAndSessionsRegister($)
+    $.sendPhoto(InputFile.byUrl('http://lesturgeons.blogs.nouvelobs.com/media/01/00/278174761.jpg', 'cod-styleeee.jpg'))
+  }
+}
 
 /* Telegram Routes */
 /* Cut and paste this list on BotFather /setcommands
@@ -329,20 +341,22 @@ version - show the bot version
 xxxxxxxx - there is some hidden commands ... find it :-)
 */
 tg.router
-    .when(['/start'], new HelpController())
-    .when(['/help'], new HelpController())
-    .when(['/ping'], new PingController())
-    .when(['/photo'], new DefaultController())
-    .when(['/gallery'], new GalleryController())
-    .when(['/scores'], new ScoresController())
-    .when(['/contacts'], new ContactsController())
-    .when(['/places'], new PlacesController())
-    .when(['/programm'], new ProgrammController())
-    .when(['/version'], new VersionController())
+    .when([/^\/start$/], new HelpController())
+    .when([/^\/help$/], new HelpController())
+    .when([/^\/ping$/], new PingController())
+    .when([/^\/photo$/], new DefaultController())
+    .when([/^\/gallery$/], new GalleryController())
+    .when([/^\/scores$/], new ScoresController())
+    .when([/^\/contacts$/], new ContactsController())
+    .when([/^\/places$/], new PlacesController())
+    .when([/^\/programm$/], new ProgrammController())
+    .when([/^\/version$/], new VersionController())
     // Hidden functions
-    .when(['/debug'], new DebugController())
-    .when(['/setscore :team :delta'], new SetScoreController())
-    .when(['/startevent :number'], new StartGameController())
+    .when([/^\/debug$/], new DebugController())
+    .when(['/scoreset :team :delta'], new SetScoreController())
+    .when(['/gamestart :gameid'], new StartGameController())
+    .when([/^\/giligili$/], new FunChatouilleController())
+    .when([/^\/cod$/], new FunCodController())
     .otherwise(new DefaultController())
 
 console.log('Listing for request on Telegram API ...')
