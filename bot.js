@@ -21,7 +21,7 @@ const redisPort         = process.env.REDIS_PORT          || '6379'
 const eventDocUrl       = process.env.EVENT_DOC_URL       || 'http://www.pipo.com/'
 const eventGamesPrefix  = process.env.EVENT_GAMES_PREFIX  || "http://localhost:3000/games/"
 const admins            = ["fredlight", "Marsary", "KrisTLG", "VincentNOYE", "Orianne55"]
-const version           = "0.0.8"
+const version           = "0.0.9"
 
 const TelegramBaseController              = Telegram.TelegramBaseController
 const TelegramBaseInlineQueryController   = Telegram.TelegramBaseInlineQueryController
@@ -81,13 +81,13 @@ redisdb.on('ready', function() {
   })
 });
 
+/* -----------------------------------------------------------------------------
+ * Class with static functions used by the bot itself
+ * -----------------------------------------------------------------------------
+ */
 class BotTools {
 
-/**
- * @param {Scope} scope
- * @param {string} msg
- **/
- static broadcastText(scope, msg) {
+  static broadcastText(scope, msg) {
    console.log("Brodacat to " + JSON.stringify(ActiveSessions))
    for (var i=0; i< ActiveSessions.sessions().length ; i++) {
      // TODO : The broadcast should exclude the sender maybe ?
@@ -95,11 +95,6 @@ class BotTools {
    }
  }
 
-  /**
-  * @param {Scope} scope
-  * @param {string} msg
-  * @param {string} file
-  **/
   static broadcastImg(scope, msg, file) {
     console.log("Brodacat to " + JSON.stringify(ActiveSessions))
     for (var i=0; i< ActiveSessions.sessions().length ; i++) {
@@ -113,6 +108,38 @@ class BotTools {
     ActiveSessions.add($.message.chat.id)
     users.register($)
     redisdb.sadd('sessions', ActiveSessions.sessions(), redisdb.print)
+  }
+
+  static AddPhotoToGallery($) {
+    console.log('+++ AddPhotoToGallery')
+    if ($.message.from.username.toLowerCase() == 'null') {
+      $.message.from.username = 'Anonymous'
+    }
+    var daPhoto = $.message.photo[$.message.photo.length-1]
+    console.log('  fileId: ' + daPhoto.fileId)
+    console.log('  width: ' + daPhoto.height)
+    console.log('  width: ' + daPhoto.width)
+    tg.api.getFile(daPhoto.fileId).then(
+      function(daFile) {
+        var url = dlurl + TGtoken + '/' + daFile.filePath
+        var ext = /\..*$/.exec(daFile.filePath)
+        var filename = /[^\/]+$/.exec(daFile.filePath)
+        var photopath = photodir + '/' + $.message.from.username + '/' + filename
+        var photourlpath = '/' + $.message.from.username + '/photo/' + /^(.*)\..*$/.exec(filename)[1]
+        var photourl = galleryUrl + photourlpath
+        console.log('    Downloading ' + url + '...')
+        dl(url, {directory: photodir + '/' + $.message.from.username, filename: filename},
+        function(err) {
+          if (err) { throw err; console.log("An error occured: " + JSON.stringify(err))}
+          else {
+            console.log('    Saved to ' + photopath)
+            console.log('')
+            $.sendMessage('Merci ' + $.message.from.username)
+            BotTools.broadcastImg($, 'Nouvelle photo de ' + $.message.from.username + "\n" + photourl + "\n", photopath)
+          }
+        }
+      )
+    })
   }
 
 }
@@ -142,39 +169,17 @@ class HelpController extends TelegramBaseController {
 
 class DefaultController extends TelegramBaseController {
 
-   /**
-    * @param {Scope} $
-    */
-    handle($) {
+   handle($) {
       BotTools.UsersAndSessionsRegister($)
 
       if ($.message.photo) {
         console.log('- Got a photo from ' + $.message.from.username);
-        var daPhoto = $.message.photo[$.message.photo.length-1]
-        console.log('  fileId: ' + daPhoto.fileId)
-        console.log('  width: ' + daPhoto.height)
-        console.log('  width: ' + daPhoto.width)
-        tg.api.getFile(daPhoto.fileId).then(
-          function(daFile) {
-            var url = dlurl + TGtoken + '/' + daFile.filePath
-            var ext = /\..*$/.exec(daFile.filePath)
-            var filename = /[^\/]+$/.exec(daFile.filePath)
-            var photopath = photodir + '/' + $.message.from.username + '/' + filename
-            var photourlpath = '/' + $.message.from.username + '/photo/' + /^(.*)\..*$/.exec(filename)[1]
-            var photourl = galleryUrl + photourlpath
-            console.log('    Downloading ' + url + '...')
-            dl(url, {directory: photodir + '/' + $.message.from.username, filename: filename},
-              function(err) {
-                if (err) { throw err; console.log("An error occured: " + JSON.stringify(err))}
-                else {
-                  console.log('    Saved to ' + photopath)
-                  console.log('')
-                  $.sendMessage('Merci ' + $.message.from.username)
-                  BotTools.broadcastImg($, 'Nouvelle photo de ' + $.message.from.username + "\n" + photourl + "\n", photopath)
-                }
-              }
-            )
-          })
+        BotTools.AddPhotoToGallery($)
+      }
+      else if ($.message.document) {
+        console.log('- got a document from ' + $.message.from.username)
+        console.log(JSON.stringify($.message))
+        $.sendMessage('Please send your photo as type photo and not attachement...')
       }
       else {
         console.log('- Unknown request received from ' + $.message.from.username)
@@ -234,11 +239,15 @@ class ContactsController extends TelegramBaseController {
 class PlacesController extends TelegramBaseController {
   handle($) {
     BotTools.UsersAndSessionsRegister($)
-    $.sendVenue(43.298829, 5.383786, "Kiosque a musique - Friday 30th - 19h30", "49 allée Léon Gambetta")
-    $.sendVenue(43.297334, 5.365755, "Place de lenche - Saturday 1st - 9h30", "Place de lenche")
-    $.sendVenue(43.286325, 5.383802, "Castellane Metro Station - Saturday 1st - 10h00", "Place Castellane")
-    $.sendVenue(43.295384, 5.387426, "Brasserie le 31 - Sunday 2nd - 10h30", "27 place Jean Jaurès")
-    $.sendVenue(43.295793, 5.375202, "Metro Vieux Port, Place Gabriel Péri - Station LeVelo - Sunday 2nd - 10h30", "1 Rue Reine Elisabeth")
+    $.sendVenue(43.298829, 5.383786, "Apero @Music Kiosk | "                + 'Friday 30th, '  + '18h',   '49 allée Léon Gambetta');
+
+    $.sendVenue(43.286325, 5.383802, 'Hike @Castellane Metro Station | '    + 'Saturday 1st, ' + '9h30',  'Place Castellane')
+    $.sendVenue(43.297334, 5.365755, 'City Tour @Place de Lenche | '        + 'Saturday 1st, ' + '10h',   'Place de lenche')
+    $.sendVenue(43.294700, 5.358056, 'Pic-Nic @Parc du Pharo | '            + 'Saturday 1st, ' + '14h',   'Palais du Pharo')
+    $.sendVenue(43.295284, 5.386855, 'Pub Crawling @Tables de la Plaine | ' + 'Saturday 1st, ' + '19h30', 'Place Jean Jaurès')
+
+    $.sendVenue(43.295793, 5.375202, 'Velo Tour @Place Gabriel Péri | '     + 'Sunday 2nd, '   + '10h30', '1 Rue Reine Elisabeth')
+    $.sendVenue(43.295384, 5.387426, 'Brunch @Brasserie le 31 | '           + 'Sunday 2nd, '   + '11h30', '27 place Jean Jaurès')
   }
 }
 
@@ -303,11 +312,6 @@ class StartGameController extends TelegramBaseController {
       console.log("StartGameController: number="  + $.query.gameid);
       if (typeof $.query.gameid !== 'undefined') {
         console.log("++ starting game " + $.query.gameid)
-        app.use('/games/' + $.query.gameid, require('node-gallery')({
-          staticFiles : 'games/' + $.query.gameid,
-          urlRoot : 'games',
-          title : 'Game ' + $.query.gameid
-        }));
         BotTools.broadcastText($, eventGamesPrefix + $.query.gameid);
       }
   }
@@ -322,8 +326,36 @@ class FunChatouilleController extends TelegramBaseController {
 
 class FunCodController extends TelegramBaseController {
   handle($) {
+    console.log('+++ FunCodController')
     BotTools.UsersAndSessionsRegister($)
-    $.sendPhoto(InputFile.byUrl('http://lesturgeons.blogs.nouvelobs.com/media/01/00/278174761.jpg', 'cod-styleeee.jpg'))
+    var choice = Math.floor((Math.random() * 3) + 1);
+    switch(choice) {
+      case 1:
+        console.log('+ sending photo')
+        $.sendPhoto(InputFile.byUrl('http://lesturgeons.blogs.nouvelobs.com/media/01/00/278174761.jpg', 'cod-styleeee.jpg'))
+        break;
+      case 2:
+        console.log('+ sending video')
+        $.sendMessage('https://www.youtube.com/watch?v=zjBj9O3YdMw');
+        break;
+      case 3:
+        console.log('+ sending audio')
+        $.sendMessage('http://www.deezer.com/track/540175');
+        break;
+    }
+  }
+}
+
+class PhotoController extends TelegramBaseController {
+  handle($) {
+    BotTools.UsersAndSessionsRegister($);
+    $.sendMessage('OK ! send me a photo now, i will wait for it...' );
+
+    $.waitForRequest.then($ => {
+      if ($.message.photo) {
+        BotTools.AddPhotoToGallery($);
+      }
+    })
   }
 }
 
@@ -344,7 +376,7 @@ tg.router
     .when([/^\/start$/], new HelpController())
     .when([/^\/help$/], new HelpController())
     .when([/^\/ping$/], new PingController())
-    .when([/^\/photo$/], new DefaultController())
+    .when([/^\/photo$/], new PhotoController())
     .when([/^\/gallery$/], new GalleryController())
     .when([/^\/scores$/], new ScoresController())
     .when([/^\/contacts$/], new ContactsController())

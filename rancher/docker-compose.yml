@@ -14,8 +14,8 @@ tgbot:
     TELEGRAM_BOT_TOKEN: "193218920:AAG9G1zm9K1EFaIHt4HgCwv3AkM0JJozlYA"
     REDIS_HOST: "redis"
     REDIS_PORT: "6379"
-    EVENT_DOC_URL: "https://s3.eu-central-1.amazonaws.com/incodwetrust-statics/Prog-InCodWeTrust-EN-2016-v1.pdf"
-    EVENT_GAMES_PREFIX: "https://icwt.services.webofmars.com/games/"
+    EVENT_DOC_URL: "https://s3.eu-central-1.amazonaws.com/incodwetrust-statics/Prog-InCodWeTrust-EN-2016-v6.pdf"
+    EVENT_GAMES_PREFIX: "https://icwt.services.webofmars.com/gallery/games/"
   links:
     - redis
 
