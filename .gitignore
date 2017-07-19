@@ -4,6 +4,9 @@
 **/*.secrets
 **/.secrets
 
+# Junks files
+**/.DS_Store
+
 # Logs
 logs
 *.log
