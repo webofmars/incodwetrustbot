@@ -22,7 +22,7 @@ const eventDocUrl       = process.env.EVENT_DOC_URL       || 'http://www.pipo.co
 const eventGamesPrefix  = process.env.EVENT_GAMES_PREFIX  || "http://localhost:3000/games/"
 const playlistUrl       = process.env.PLAYLIST_URL        || 'http://www.deezer.com/'
 const admins            = ["fredlight", "Marsary", "KrisTLG", "VincentNOYE", "Orianne55"]
-const version           = "0.0.9b"
+const version           = "1.0.0"
 
 const TelegramBaseController              = Telegram.TelegramBaseController
 const TelegramBaseInlineQueryController   = Telegram.TelegramBaseInlineQueryController
@@ -88,18 +88,28 @@ redisdb.on('ready', function() {
  */
 class BotTools {
 
+  static getUsername(msg){
+    var username = msg.from.username;
+    if (username == null) {
+      username = 'Anonymous'
+    }
+    return username;
+  }
+
   static broadcastText(scope, msg) {
    console.log("Brodacat to " + JSON.stringify(ActiveSessions))
    for (var i=0; i< ActiveSessions.sessions().length ; i++) {
+     console.log('- to ' + ActiveSessions.sessions()[i])
      // TODO : The broadcast should exclude the sender maybe ?
      tg.api.sendMessage(ActiveSessions.sessions()[i], msg)
    }
- }
+  }
 
   static broadcastImg(scope, msg, file) {
     console.log("Brodacat to " + JSON.stringify(ActiveSessions))
     for (var i=0; i< ActiveSessions.sessions().length ; i++) {
       // TODO : The broadcast should exclude the sender maybe ?
+      console.log('- to ' + ActiveSessions.sessions()[i])
       tg.api.sendMessage(ActiveSessions.sessions()[i], msg)
       tg.api.sendPhoto(ActiveSessions.sessions()[i], InputFile.byFilePath(file))
     }
@@ -113,9 +123,8 @@ class BotTools {
 
   static AddPhotoToGallery($) {
     console.log('+++ AddPhotoToGallery')
-    if ($.message.from.username.toLowerCase() == 'null') {
-      $.message.from.username = 'Anonymous'
-    }
+    var username = BotTools.getUsername($.message)
+
     var daPhoto = $.message.photo[$.message.photo.length-1]
     console.log('  fileId: ' + daPhoto.fileId)
     console.log('  width: ' + daPhoto.height)
@@ -125,18 +134,18 @@ class BotTools {
         var url = dlurl + TGtoken + '/' + daFile.filePath
         var ext = /\..*$/.exec(daFile.filePath)
         var filename = /[^\/]+$/.exec(daFile.filePath)
-        var photopath = photodir + '/' + $.message.from.username + '/' + filename
-        var photourlpath = '/' + $.message.from.username + '/photo/' + /^(.*)\..*$/.exec(filename)[1]
+        var photopath = photodir + '/' + username + '/' + filename
+        var photourlpath = '/' + BotTools.getUsername($.message) + '/photo/' + /^(.*)\..*$/.exec(filename)[1]
         var photourl = galleryUrl + photourlpath
         console.log('    Downloading ' + url + '...')
-        dl(url, {directory: photodir + '/' + $.message.from.username, filename: filename},
+        dl(url, {directory: photodir + '/' + username, filename: filename},
         function(err) {
           if (err) { throw err; console.log("An error occured: " + JSON.stringify(err))}
           else {
             console.log('    Saved to ' + photopath)
             console.log('')
-            $.sendMessage('Merci ' + $.message.from.username)
-            BotTools.broadcastImg($, 'Nouvelle photo de ' + $.message.from.username + "\n" + photourl + "\n", photopath)
+            $.sendMessage('Merci ' + username)
+            BotTools.broadcastImg($, 'Nouvelle photo de ' + username + "\n" + photourl + "\n", photopath)
           }
         }
       )
@@ -173,19 +182,20 @@ class HelpController extends TelegramBaseController {
 class DefaultController extends TelegramBaseController {
 
    handle($) {
+      var username = BotTools.getUsername($.message)
       BotTools.UsersAndSessionsRegister($)
 
       if ($.message.photo) {
-        console.log('- Got a photo from ' + $.message.from.username);
+        console.log('- Got a photo from ' + username);
         BotTools.AddPhotoToGallery($)
       }
       else if ($.message.document) {
-        console.log('- got a document from ' + $.message.from.username)
+        console.log('- got a document from ' + username)
         console.log(JSON.stringify($.message))
         $.sendMessage('Please send your photo as type photo and not attachement...')
       }
       else {
-        console.log('- Unknown request received from ' + $.message.from.username)
+        console.log('- Unknown request received from ' + username)
         console.log(JSON.stringify($.message))
       }
     }
@@ -273,11 +283,12 @@ class SetScoreController extends TelegramBaseController {
 
   handle($) {
       console.log("+++ SetScoreController")
+      var username = BotTools.getUsername($.message)
       BotTools.UsersAndSessionsRegister($)
 
-      console.log("SetScoreController: user="  + $.message.from.username);
-      if (admins.indexOf($.message.from.username) == -1) {
-        console.log("Unauthorized access: " + $.message.from.username)
+      console.log("SetScoreController: user="  + username);
+      if (admins.indexOf(username) == -1) {
+        console.log("Unauthorized access: " + username)
         $.sendMessage("You are not authorized to call this command !")
         return false;
       }
@@ -303,11 +314,12 @@ class StartGameController extends TelegramBaseController {
 
   handle($) {
       console.log("+++ StartGameController")
+      var username = BotTools.getUsername($.message)
       BotTools.UsersAndSessionsRegister($)
 
-      console.log("StartGameController: user="  + $.message.from.username);
-      if (admins.indexOf($.message.from.username) == -1) {
-        console.log("Unauthorized access: " + $.message.from.username)
+      console.log("StartGameController: user="  + username);
+      if (admins.indexOf(username) == -1) {
+        console.log("Unauthorized access: " + username)
         $.sendMessage("You are not authorized to call this command !")
         return false;
       }

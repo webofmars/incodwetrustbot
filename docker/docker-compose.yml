@@ -1,0 +1,45 @@
+version: '2.1'
+
+services:
+
+  telegram_bot:
+    image: webofmars/incodwetrustbot:develop
+    volumes:
+      - photos:/usr/src/app/photos
+    ports:
+      - 3000
+    environment:
+      - GALLERY_URL
+      - PHOTOS_DIRECTORY
+      - TELEGRAM_BOT_TOKEN
+      - REDIS_HOST
+      - REDIS_PORT
+      - EVENT_DOC_URL
+      - EVENT_GAMES_PREFIX
+      - PLAYLIST_URL
+    links:
+      - database:redis
+
+  database:
+    image: redis:alpine
+    entrypoint:
+      - 'redis-server'
+      - '--appendonly'
+      - 'yes'
+    volumes:
+    - redis-data:/data
+
+  db_admin:
+    image: diyan/redis-commander:latest
+    entrypoint:
+      - 'redis-commander'
+      - '--redis-host'
+      - 'redis'
+    ports:
+      - 8081
+    links:
+      - database:redis
+
+volumes:
+  redis-data:
+  photos:

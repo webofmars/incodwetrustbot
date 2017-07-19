@@ -1,3 +1,12 @@
+# env configuration & secrets
+**/*.env
+**/.env
+**/*.secrets
+**/.secrets
+
+# Junks files
+**/.DS_Store
+
 # Logs
 logs
 *.log

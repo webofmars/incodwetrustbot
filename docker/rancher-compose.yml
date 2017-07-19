@@ -1,4 +1,7 @@
-tgbot:
+version: '2.1'
+services:
+
+telegram_bot:
   scale: 1
   health_check:
     port: 3000
@@ -9,7 +12,7 @@ tgbot:
     healthy_threshold: 2
     response_timeout: 2000
 
-redis:
+database:
   scale: 1
   health_check:
     port: 6379
@@ -20,7 +23,7 @@ redis:
     healthy_threshold: 2
     response_timeout: 2000
 
-admin:
+db_admin:
   scale: 1
   health_check:
     port: 8081
