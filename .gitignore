@@ -7,6 +7,10 @@
 # Junks files
 **/.DS_Store
 
+# sublime text stuff
+/*.sublime-project
+/*.sublime-workspace
+
 # Logs
 logs
 *.log

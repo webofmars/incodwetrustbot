@@ -1,4 +1,4 @@
-version: '2.1'
+version: '2.2'
 
 services:
 
@@ -7,7 +7,7 @@ services:
     volumes:
       - photos:/usr/src/app/photos
     ports:
-      - 3000
+      - 3000:3000
     environment:
       - GALLERY_URL
       - PHOTOS_DIRECTORY
@@ -36,7 +36,7 @@ services:
       - '--redis-host'
       - 'redis'
     ports:
-      - 8081
+      - 8081:8081
     links:
       - database:redis
 
