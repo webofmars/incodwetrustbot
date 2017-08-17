@@ -1,4 +1,4 @@
-FROM node:alpine
+FROM node:7-alpine
 
 WORKDIR /usr/src/app
 ENTRYPOINT [ "npm" ]
