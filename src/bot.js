@@ -151,9 +151,14 @@ class ScoresController extends TelegramBaseController {
         console.log("Redis Error: " + err);
         exit
       };
-      $.sendMessage("*Voici les scores*:\n" + reply.toString().replace(/\{/g, '').replace(/\}/g, '').replace(/:/g, ' : ').replace(/"/g, '').replace(/,/g, "\n"), {
-        parse_mode: 'Markdown'
-      });
+      if (reply) {
+        console.log("+++ ScoresController scores:", reply)
+        $.sendMessage("*Voici les scores*:\n" + reply.toString().replace(/\{/g, '').replace(/\}/g, '').replace(/:/g, ' : ').replace(/"/g, '').replace(/,/g, "\n"), {
+          parse_mode: 'Markdown'
+        });
+      }else{
+        $.sendMessage("Les scores ne sont pas disponibles.");
+      }
     });
   }
 
@@ -204,18 +209,16 @@ class SetScoreController extends TelegramBaseController {
 
   handle($) {
     console.log("+++ SetScoreController")
-    var username = BotTools.getUsername($.message)
     BotTools.UsersAndSessionsRegister($)
 
-    console.log("SetScoreController: user=" + username);
-    if (Config.admins.indexOf(username) == -1) {
-      console.log("Unauthorized access: " + username)
-      $.sendMessage("You are not authorized to call this command !")
+    if (!BotTools.checkAdminAccess($)) {
       return false;
     }
 
     console.log("SetScoreController: team=" + $.query.team);
     console.log("SetScoreController: delta=" + $.query.delta);
+
+    const scores = BotTools.scores();
 
     console.log("scores A: " + JSON.stringify(scores));
     if (typeof scores[$.query.team] !== 'undefined') {
@@ -240,9 +243,7 @@ class StartGameController extends TelegramBaseController {
     BotTools.UsersAndSessionsRegister($)
 
     console.log("StartGameController: user=" + username);
-    if (Config.admins.indexOf(username) == -1) {
-      console.log("Unauthorized access: " + username)
-      $.sendMessage("You are not authorized to call this command !")
+    if (!BotTools.checkAdminAccess($)) {
       return false;
     }
 

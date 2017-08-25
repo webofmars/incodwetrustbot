@@ -1,4 +1,3 @@
-
 const Config = require('./Config.js');
 const SessionsManager = require('./SessionsManager.js');
 const UsersDB = require('./UsersDB.js');
@@ -25,8 +24,21 @@ var scores = {};
 
 class BotTools {
 
-    static tg(){
+    static tg() {
         return tg;
+    }
+    static scores() {
+        return tg;
+    }
+
+    static checkAdminAccess($) {
+        var username = BotTools.getUsername($.message)
+        if (Config.admins.indexOf(username) == -1) {
+            console.log('Unauthorized access for "%s": admins:', username, Config.admins)
+            $.sendMessage("You are not authorized to call this command !")
+            return false;
+        }
+        return true;
     }
 
     static hydrateSessions(sessions) {

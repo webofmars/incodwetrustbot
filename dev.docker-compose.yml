@@ -5,7 +5,7 @@ services:
   telegram_bot:
     build: 
       context: .
-      dockerfile: toub.dockerfile
+      dockerfile: dev.dockerfile
     command: tail -f /dev/null
     volumes:
       - ./photos:/usr/src/app/photos
@@ -24,6 +24,7 @@ services:
       - EVENT_DOC_URL
       - EVENT_GAMES_PREFIX
       - PLAYLIST_URL
+      - ADMINS_USERNAMES
     links:
       - database:redis
 
