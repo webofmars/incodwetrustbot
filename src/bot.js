@@ -6,42 +6,34 @@ references :
 *******************************************************************************/
 'use strict'
 
-const UsersDB           = require('./lib/UsersDB.js');
-const SessionsManager   = require('./lib/SessionsManager.js');
-const dl                = require('download-file');
-const Telegram          = require('telegram-node-bot');
-const Redis             = require('redis');
+const redisdb = require('./lib/redisdb');
+const Config = require('./lib/Config.js');
+const BotTools = require('./lib/BotTools.js');
+const UsersDB = require('./lib/UsersDB.js');
+const dl = require('download-file');
+const Telegram = require('telegram-node-bot');
+const Quizz = require('./bot/quizz.js');
+const QuizzController = Quizz.QuizzController;
+const QuizzService = Quizz.QuizzService;
+const Teams = require('./bot/teams.js');
+const TeamsController = Teams.TeamsController;
+const TeamsService = Teams.TeamsService;
 
-const dlurl             = 'https://api.telegram.org/file/bot'
-const galleryUrl        = process.env.GALLERY_URL         || 'http://localhost:3000/gallery'
-const photodir          = process.env.PHOTOS_DIRECTORY    || 'photos'
-const TGtoken           = process.env.TELEGRAM_BOT_TOKEN  || 'xxxxxxxxxxxx:yyyyyyyyyyyyyyyy'
-const redisHost         = process.env.REDIS_HOST          || 'redis'
-const redisPort         = process.env.REDIS_PORT          || '6379'
-const eventDocUrl       = process.env.EVENT_DOC_URL       || 'http://www.pipo.com/'
-const eventGamesPrefix  = process.env.EVENT_GAMES_PREFIX  || "http://localhost:3000/games/"
-const playlistUrl       = process.env.PLAYLIST_URL        || 'http://www.deezer.com/'
-const admins            = ["fredlight", "Marsary", "KrisTLG", "VincentNOYE", "Orianne55"]
-const version           = "1.0.0"
+const dlurl = 'https://api.telegram.org/file/bot';
 
-const TelegramBaseController              = Telegram.TelegramBaseController
-const TelegramBaseInlineQueryController   = Telegram.TelegramBaseInlineQueryController
+const TelegramBaseController = Telegram.TelegramBaseController
+const TelegramBaseInlineQueryController = Telegram.TelegramBaseInlineQueryController
 const TelegramBaseCallbackQueryController = Telegram.TelegramBaseCallbackQueryController
-const BaseScopeExtension                  = Telegram.BaseScopeExtension
-const InlineQueryResultLocation           = Telegram.InlineQueryResultLocation
-const InputFile                           = Telegram.InputFile
-
-console.log("INFO: " + JSON.stringify(process.versions));
-console.dir("INFO: TG BOT TOKEN: " + TGtoken)
-
-var tg              = new Telegram.Telegram(TGtoken);
-var users           = new UsersDB();
-var ActiveSessions  = new SessionsManager();
-var scores          = {};
+const BaseScopeExtension = Telegram.BaseScopeExtension
+const InlineQueryResultLocation = Telegram.InlineQueryResultLocation
+const InputFile = Telegram.InputFile
 
 /* Express web component */
 const express = require('express');
-const app     = express();
+const app = express();
+
+QuizzService.init();
+TeamsService.init();
 
 app.set('views', __dirname + '/node-gallery/views');
 app.set('view engine', 'ejs');
@@ -51,31 +43,32 @@ app.listen(3000, function () {
 });
 
 app.use('/gallery', require('node-gallery')({
-  staticFiles : photodir,
-  urlRoot : 'gallery',
-  title : 'InCodWeTrust Gallery',
+  staticFiles: Config.photodir,
+  urlRoot: 'gallery',
+  title: 'InCodWeTrust Gallery',
   render: false
-}), function(req, res, next){
-  return res.render('gallery', { galleryHtml : req.html });
+}), function (req, res, next) {
+  return res.render('gallery', {
+    galleryHtml: req.html
+  });
 });
 
 /* Folders for some static files */
 app.use(express.static('public'));
 
 /* Redis connexion */
-var redisdb = Redis.createClient({host: redisHost, port: redisPort});
-redisdb.on('ready', function() {
+redisdb.on('ready', function () {
   console.log('Connected to Redis');
 
   // init the sessions manager with saved db
   redisdb.smembers('sessions', function (err, reply) {
-    if (err) { console.log("Error when loading active sessions: " + err) }
-    else {
+    if (err) {
+      console.log("Error when loading active sessions: " + err)
+    } else {
       if (reply != null && reply != "") {
-          console.log("DEBUG: ActiveSessions creation: " + JSON.stringify(reply))
-          ActiveSessions.hydrate(reply)
-      }
-      else {
+        console.log("DEBUG: ActiveSessions creation: " + JSON.stringify(reply))
+        BotTools.hydrateSessions(reply)
+      } else {
         console.log("DEBUG: no sessions were loaded from redis")
       }
     }
@@ -83,87 +76,14 @@ redisdb.on('ready', function() {
 });
 
 /* -----------------------------------------------------------------------------
- * Class with static functions used by the bot itself
- * -----------------------------------------------------------------------------
- */
-class BotTools {
-
-  static getUsername(msg){
-    var username = msg.from.username;
-    if (username == null) {
-      username = 'Anonymous'
-    }
-    return username;
-  }
-
-  static broadcastText(scope, msg) {
-   console.log("Brodacat to " + JSON.stringify(ActiveSessions))
-   for (var i=0; i< ActiveSessions.sessions().length ; i++) {
-     console.log('- to ' + ActiveSessions.sessions()[i])
-     // TODO : The broadcast should exclude the sender maybe ?
-     tg.api.sendMessage(ActiveSessions.sessions()[i], msg)
-   }
-  }
-
-  static broadcastImg(scope, msg, file) {
-    console.log("Brodacat to " + JSON.stringify(ActiveSessions))
-    for (var i=0; i< ActiveSessions.sessions().length ; i++) {
-      // TODO : The broadcast should exclude the sender maybe ?
-      console.log('- to ' + ActiveSessions.sessions()[i])
-      tg.api.sendMessage(ActiveSessions.sessions()[i], msg)
-      tg.api.sendPhoto(ActiveSessions.sessions()[i], InputFile.byFilePath(file))
-    }
-  }
-
-  static UsersAndSessionsRegister($) {
-    ActiveSessions.add($.message.chat.id)
-    users.register($)
-    redisdb.sadd('sessions', ActiveSessions.sessions(), redisdb.print)
-  }
-
-  static AddPhotoToGallery($) {
-    console.log('+++ AddPhotoToGallery')
-    var username = BotTools.getUsername($.message)
-
-    var daPhoto = $.message.photo[$.message.photo.length-1]
-    console.log('  fileId: ' + daPhoto.fileId)
-    console.log('  width: ' + daPhoto.height)
-    console.log('  width: ' + daPhoto.width)
-    tg.api.getFile(daPhoto.fileId).then(
-      function(daFile) {
-        var url = dlurl + TGtoken + '/' + daFile.filePath
-        var ext = /\..*$/.exec(daFile.filePath)
-        var filename = /[^\/]+$/.exec(daFile.filePath)
-        var photopath = photodir + '/' + username + '/' + filename
-        var photourlpath = '/' + BotTools.getUsername($.message) + '/photo/' + /^(.*)\..*$/.exec(filename)[1]
-        var photourl = galleryUrl + photourlpath
-        console.log('    Downloading ' + url + '...')
-        dl(url, {directory: photodir + '/' + username, filename: filename},
-        function(err) {
-          if (err) { throw err; console.log("An error occured: " + JSON.stringify(err))}
-          else {
-            console.log('    Saved to ' + photopath)
-            console.log('')
-            $.sendMessage('Merci ' + username)
-            BotTools.broadcastImg($, 'Nouvelle photo de ' + username + "\n" + photourl + "\n", photopath)
-          }
-        }
-      )
-    })
-  }
-
-}
-
-
-/* -----------------------------------------------------------------------------
  * Telegram Controllers
  * -----------------------------------------------------------------------------
  */
 class HelpController extends TelegramBaseController {
 
-    handle($) {
-        BotTools.UsersAndSessionsRegister($)
-        $.sendMessage("Usage: \n\
+  handle($) {
+    BotTools.UsersAndSessionsRegister($)
+    $.sendMessage("Usage: \n\
         /start : start playing with me \n \
         /help : display help message \n \
         /ping : check if i'am still alive ;-) \n \
@@ -176,45 +96,47 @@ class HelpController extends TelegramBaseController {
         /playlist : send me some good sound of Marseille \n \
         /version : show the bot version \n \
         /xxxxxxxx : there is some hidden commands ... find it :-)");
-    }
+  }
 }
 
 class DefaultController extends TelegramBaseController {
 
-   handle($) {
-      var username = BotTools.getUsername($.message)
-      BotTools.UsersAndSessionsRegister($)
+  handle($) {
+    var username = BotTools.getUsername($.message)
+    BotTools.UsersAndSessionsRegister($)
 
-      if ($.message.photo) {
-        console.log('- Got a photo from ' + username);
-        BotTools.AddPhotoToGallery($)
-      }
-      else if ($.message.document) {
-        console.log('- got a document from ' + username)
-        console.log(JSON.stringify($.message))
-        $.sendMessage('Please send your photo as type photo and not attachement...')
-      }
-      else {
+    if ($.message.photo) {
+      console.log('- Got a photo from ' + username);
+      BotTools.AddPhotoToGallery($)
+    } else if ($.message.document) {
+      console.log('- got a document from ' + username)
+      console.log(JSON.stringify($.message))
+      $.sendMessage('Please send your photo as type photo and not attachement...')
+    } else {
+      if (!QuizzService.tryToProcessAnswer($)) {
         console.log('- Unknown request received from ' + username)
         console.log(JSON.stringify($.message))
       }
     }
+  }
 }
 
 class PingController extends TelegramBaseController {
-    handle($) {
-        BotTools.UsersAndSessionsRegister($)
-        $.sendMessage('pong')
-    }
+  handle($) {
+    BotTools.UsersAndSessionsRegister($)
+    $.sendMessage('pong')
+  }
 }
 
 class GalleryController extends TelegramBaseController {
   /**
    * @param {Scope} $
    */
-   handle($) {
-     BotTools.UsersAndSessionsRegister($)
-     $.sendMessage('[Gallerie Photos](' + galleryUrl +')', { parse_mode: 'Markdown' })
+  handle($) {
+    BotTools.UsersAndSessionsRegister($)
+    $.sendMessage('[Gallerie Photos](' + Config.galleryUrl + ')', {
+      parse_mode: 'Markdown'
+    })
   }
 }
 
@@ -231,8 +153,18 @@ class ScoresController extends TelegramBaseController {
     console.log("+++ ScoresController")
     BotTools.UsersAndSessionsRegister($)
     redisdb.get("icwt.scores", function (err, reply) {
-      if (err) { console.log("Redis Error: "+err); exit };
-      $.sendMessage("*Voici les scores*:\n" + reply.toString().replace(/\{/g,'').replace(/\}/g, '').replace(/:/g,' : ').replace(/"/g,'').replace(/,/g,"\n"), { parse_mode: 'Markdown' });
+      if (err) {
+        console.log("Redis Error: " + err);
+        exit
+      };
+      if (reply) {
+        console.log("+++ ScoresController scores:", reply.toString())
+        $.sendMessage("*Voici les scores*:\n" + reply.toString().replace(/\{/g, '').replace(/\}/g, '').replace(/:/g, ' : ').replace(/"/g, '').replace(/,/g, "\n"), {
+          parse_mode: 'Markdown'
+        });
+      }else{
+        $.sendMessage("Les scores ne sont pas disponibles.");
+      }
     });
   }
 
@@ -252,15 +184,15 @@ class ContactsController extends TelegramBaseController {
 class PlacesController extends TelegramBaseController {
   handle($) {
     BotTools.UsersAndSessionsRegister($)
-    $.sendVenue(43.298829, 5.383786, "Apero @Music Kiosk | "                + 'Friday 30th, '  + '18h',   '49 allée Léon Gambetta');
+    $.sendVenue(43.298829, 5.383786, "Apero @Music Kiosk | " + 'Friday 30th, ' + '18h', '49 allée Léon Gambetta');
 
-    $.sendVenue(43.286325, 5.383802, 'Hike @Castellane Metro Station | '    + 'Saturday 1st, ' + '9h30',  'Place Castellane')
-    $.sendVenue(43.297334, 5.365755, 'City Tour @Place de Lenche | '        + 'Saturday 1st, ' + '10h',   'Place de lenche')
-    $.sendVenue(43.294700, 5.358056, 'Pic-Nic @Parc du Pharo | '            + 'Saturday 1st, ' + '14h',   'Palais du Pharo')
+    $.sendVenue(43.286325, 5.383802, 'Hike @Castellane Metro Station | ' + 'Saturday 1st, ' + '9h30', 'Place Castellane')
+    $.sendVenue(43.297334, 5.365755, 'City Tour @Place de Lenche | ' + 'Saturday 1st, ' + '10h', 'Place de lenche')
+    $.sendVenue(43.294700, 5.358056, 'Pic-Nic @Parc du Pharo | ' + 'Saturday 1st, ' + '14h', 'Palais du Pharo')
     $.sendVenue(43.295284, 5.386855, 'Pub Crawling @Tables de la Plaine | ' + 'Saturday 1st, ' + '19h30', 'Place Jean Jaurès')
 
-    $.sendVenue(43.295793, 5.375202, 'Velo Tour @Place Gabriel Péri | '     + 'Sunday 2nd, '   + '10h30', '1 Rue Reine Elisabeth')
-    $.sendVenue(43.295384, 5.387426, 'Brunch @Brasserie le 31 | '           + 'Sunday 2nd, '   + '11h30', '27 place Jean Jaurès')
+    $.sendVenue(43.295793, 5.375202, 'Velo Tour @Place Gabriel Péri | ' + 'Sunday 2nd, ' + '10h30', '1 Rue Reine Elisabeth')
+    $.sendVenue(43.295384, 5.387426, 'Brunch @Brasserie le 31 | ' + 'Sunday 2nd, ' + '11h30', '27 place Jean Jaurès')
   }
 }
 
@@ -268,67 +200,64 @@ class ProgrammController extends TelegramBaseController {
   handle($) {
     BotTools.UsersAndSessionsRegister($)
     $.sendMessage('Please wait until the download is finished...')
-    $.sendDocument(InputFile.byUrl(eventDocUrl, 'ICWT.pdf'))
+    $.sendDocument(InputFile.byUrl(Config.eventDocUrl, 'ICWT.pdf'))
   }
 }
 
 class VersionController extends TelegramBaseController {
   handle($) {
     BotTools.UsersAndSessionsRegister($)
-    $.sendMessage('Version ' + version)
+    $.sendMessage('Version ' + Config.version)
   }
 }
 
 class SetScoreController extends TelegramBaseController {
 
   handle($) {
-      console.log("+++ SetScoreController")
-      var username = BotTools.getUsername($.message)
-      BotTools.UsersAndSessionsRegister($)
+    console.log("+++ SetScoreController")
+    BotTools.UsersAndSessionsRegister($)
 
-      console.log("SetScoreController: user="  + username);
-      if (admins.indexOf(username) == -1) {
-        console.log("Unauthorized access: " + username)
-        $.sendMessage("You are not authorized to call this command !")
-        return false;
-      }
+    if (!BotTools.checkAdminAccess($)) {
+      return false;
+    }
 
-      console.log("SetScoreController: team="  + $.query.team);
-      console.log("SetScoreController: delta=" + $.query.delta);
+    console.log("SetScoreController: team=" + $.query.team);
+    console.log("SetScoreController: delta=" + $.query.delta);
 
-      console.log("scores A: " + JSON.stringify(scores));
-      if (typeof scores[$.query.team] !== 'undefined') {
-        scores[$.query.team] = parseInt(scores[$.query.team])+parseInt($.query.delta)
-      }
-      else {
-        scores[$.query.team] = $.query.delta
-      }
-      console.log("scores B: " + JSON.stringify(scores));
+    const scores = BotTools.scores();
 
-      BotTools.broadcastText($, "Team " + $.query.team + " just won " + $.query.delta + " point(s). Congrats !");
-      redisdb.set('icwt.scores', JSON.stringify(scores));
+    console.log("scores A: " + JSON.stringify(scores));
+    if (typeof scores[$.query.team] !== 'undefined') {
+      scores[$.query.team] = parseInt(scores[$.query.team]) + parseInt($.query.delta)
+    } else {
+      scores[$.query.team] = $.query.delta
+    }
+    console.log("scores B: " + JSON.stringify(scores));
+
+    BotTools.broadcastText($, "Team " + $.query.team + " just won " + $.query.delta + " point(s). Congrats !");
+    redisdb.set('icwt.scores', JSON.stringify(scores));
   }
 }
+
+
 
 class StartGameController extends TelegramBaseController {
 
   handle($) {
-      console.log("+++ StartGameController")
-      var username = BotTools.getUsername($.message)
-      BotTools.UsersAndSessionsRegister($)
+    console.log("+++ StartGameController")
+    var username = BotTools.getUsername($.message)
+    BotTools.UsersAndSessionsRegister($)
 
-      console.log("StartGameController: user="  + username);
-      if (admins.indexOf(username) == -1) {
-        console.log("Unauthorized access: " + username)
-        $.sendMessage("You are not authorized to call this command !")
-        return false;
-      }
+    console.log("StartGameController: user=" + username);
+    if (!BotTools.checkAdminAccess($)) {
+      return false;
+    }
 
-      console.log("StartGameController: number="  + $.query.gameid);
-      if (typeof $.query.gameid !== 'undefined') {
-        console.log("++ starting game " + $.query.gameid)
-        BotTools.broadcastText($, eventGamesPrefix + $.query.gameid);
-      }
+    console.log("StartGameController: number=" + $.query.gameid);
+    if (typeof $.query.gameid !== 'undefined') {
+      console.log("++ starting game " + $.query.gameid)
+      BotTools.broadcastText($, Config.eventGamesPrefix + $.query.gameid);
+    }
   }
 }
 
@@ -344,7 +273,7 @@ class FunCodController extends TelegramBaseController {
     console.log('+++ FunCodController')
     BotTools.UsersAndSessionsRegister($)
     var choice = Math.floor((Math.random() * 3) + 1);
-    switch(choice) {
+    switch (choice) {
       case 1:
         console.log('+ sending photo')
         $.sendPhoto(InputFile.byUrl('http://lesturgeons.blogs.nouvelobs.com/media/01/00/278174761.jpg', 'cod-styleeee.jpg'))
@@ -364,7 +293,7 @@ class FunCodController extends TelegramBaseController {
 class PhotoController extends TelegramBaseController {
   handle($) {
     BotTools.UsersAndSessionsRegister($);
-    $.sendMessage('OK ! send me a photo now, i will wait for it...' );
+    $.sendMessage('OK ! send me a photo now, i will wait for it...');
 
     $.waitForRequest.then($ => {
       if ($.message.photo) {
@@ -376,7 +305,7 @@ class PhotoController extends TelegramBaseController {
 
 class PlaylistController extends TelegramBaseController {
   handle($) {
-    $.sendMessage(playlistUrl);
+    $.sendMessage(Config.playlistUrl);
   }
 }
 
@@ -394,24 +323,26 @@ programm - send me again the programm document
 version - show the bot version
 xxxxxxxx - there is some hidden commands ... find it :-)
 */
-tg.router
-    .when([/^\/start$/], new HelpController())
-    .when([/^\/help$/], new HelpController())
-    .when([/^\/ping$/], new PingController())
-    .when([/^\/photo$/], new PhotoController())
-    .when([/^\/gallery$/], new GalleryController())
-    .when([/^\/scores$/], new ScoresController())
-    .when([/^\/contacts$/], new ContactsController())
-    .when([/^\/places$/], new PlacesController())
-    .when([/^\/programm$/], new ProgrammController())
-    .when([/^\/playlist$/], new PlaylistController())
-    .when([/^\/version$/], new VersionController())
-    // Hidden functions
-    .when([/^\/debug$/], new DebugController())
-    .when(['/scoreset :team :delta'], new SetScoreController())
-    .when(['/gamestart :gameid'], new StartGameController())
-    .when([/^\/giligili$/], new FunChatouilleController())
-    .when([/^\/cod$/], new FunCodController())
-    .otherwise(new DefaultController())
+BotTools.tg().router
+  .when(['/quizz-restart :quizzname', '/quizz-start :quizzname', '/quizz-skip', '/quizz'], new QuizzController())
+  .when(['/teams'], new TeamsController())
+  .when([/^\/start$/], new HelpController())
+  .when([/^\/help$/], new HelpController())
+  .when([/^\/ping$/], new PingController())
+  .when([/^\/photo$/], new PhotoController())
+  .when([/^\/gallery$/], new GalleryController())
+  .when([/^\/scores$/], new ScoresController())
+  .when([/^\/contacts$/], new ContactsController())
+  .when([/^\/places$/], new PlacesController())
+  .when([/^\/programm$/], new ProgrammController())
+  .when([/^\/playlist$/], new PlaylistController())
+  .when([/^\/version$/], new VersionController())
+  // Hidden functions
+  .when([/^\/debug$/], new DebugController())
+  .when(['/scoreset :team :delta'], new SetScoreController())
+  .when(['/gamestart :gameid'], new StartGameController())
+  .when([/^\/giligili$/], new FunChatouilleController())
+  .when([/^\/cod$/], new FunCodController())
+  .otherwise(new DefaultController())
 
 console.log('Listing for request on Telegram API ...')
