@@ -3,6 +3,7 @@
 **/.env
 **/*.secrets
 **/.secrets
+dev.env.sh
 
 # Junks files
 **/.DS_Store
