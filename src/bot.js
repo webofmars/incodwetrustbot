@@ -325,7 +325,7 @@ xxxxxxxx - there is some hidden commands ... find it :-)
 */
 BotTools.tg().router
   .when(['/quizz-restart :quizzname', '/quizz-start :quizzname', '/quizz-skip', '/quizz'], new QuizzController())
-  .when(['/teams'], new TeamsController())
+  .when(['/teams-members', '/teams-scores', '/teams-reset', '/teams'], new TeamsController())
   .when([/^\/start$/], new HelpController())
   .when([/^\/help$/], new HelpController())
   .when([/^\/ping$/], new PingController())
