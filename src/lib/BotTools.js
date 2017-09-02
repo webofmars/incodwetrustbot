@@ -28,7 +28,7 @@ class BotTools {
         return tg;
     }
     static scores() {
-        return tg;
+        return scores;
     }
 
     static checkAdminAccess($) {
@@ -46,6 +46,7 @@ class BotTools {
     }
 
     static getUsername(msg) {
+        console.log('\n=> Message from: ', msg.from);
         var username = msg.from.username;
         if (username == null) {
             username = 'Anonymous'

@@ -1,0 +1,12 @@
+Equipe rouge:
+    score: 5
+    members:
+        - id: 411495234 # toubb
+        - id: 555555555
+
+Equipe vert:
+    score: 5
+    members:
+        - id: 000000000
+        - id: 111111111
+        - id: 222222222

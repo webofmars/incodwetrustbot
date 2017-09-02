@@ -12,9 +12,12 @@ const BotTools = require('./lib/BotTools.js');
 const UsersDB = require('./lib/UsersDB.js');
 const dl = require('download-file');
 const Telegram = require('telegram-node-bot');
-const Quizz = require('./quizz/quizz.js');
+const Quizz = require('./bot/quizz.js');
 const QuizzController = Quizz.QuizzController;
 const QuizzService = Quizz.QuizzService;
+const Teams = require('./bot/teams.js');
+const TeamsController = Teams.TeamsController;
+const TeamsService = Teams.TeamsService;
 
 const dlurl = 'https://api.telegram.org/file/bot';
 
@@ -28,6 +31,9 @@ const InputFile = Telegram.InputFile
 /* Express web component */
 const express = require('express');
 const app = express();
+
+QuizzService.init();
+TeamsService.init();
 
 app.set('views', __dirname + '/node-gallery/views');
 app.set('view engine', 'ejs');
@@ -152,7 +158,7 @@ class ScoresController extends TelegramBaseController {
         exit
       };
       if (reply) {
-        console.log("+++ ScoresController scores:", reply)
+        console.log("+++ ScoresController scores:", reply.toString())
         $.sendMessage("*Voici les scores*:\n" + reply.toString().replace(/\{/g, '').replace(/\}/g, '').replace(/:/g, ' : ').replace(/"/g, '').replace(/,/g, "\n"), {
           parse_mode: 'Markdown'
         });
@@ -318,7 +324,8 @@ version - show the bot version
 xxxxxxxx - there is some hidden commands ... find it :-)
 */
 BotTools.tg().router
-  .when(['/quizz :quizzname restart', '/quizz :quizzname', '/quizz'], new QuizzController())
+  .when(['/quizz-restart :quizzname', '/quizz-start :quizzname', '/quizz-skip', '/quizz'], new QuizzController())
+  .when(['/teams'], new TeamsController())
   .when([/^\/start$/], new HelpController())
   .when([/^\/help$/], new HelpController())
   .when([/^\/ping$/], new PingController())
