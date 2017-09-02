@@ -11,4 +11,4 @@ RUN apk add --no-cache imagemagick git curl
 RUN [ -d /usr/src/app/photos ] || mkdir -p /usr/src/app/photos
 
 COPY src /usr/src/app
-RUN cd /usr/src/app && npm install -g
+RUN cd /usr/src/app && npm install -g nodemon && npm install
