@@ -13,30 +13,47 @@ let teams = {};
 
 class TeamsService {
 
+    static loadDefault(){
+        // load default teams from yaml file
+        const defaultTeams = YAML.load(__dirname + '/../data/default-teams.yml');
+        // add name attribute from key
+        teams = Object.keys(defaultTeams).map(key => Object.assign(defaultTeams[key], {
+            name: key
+        }));
+    }
+
     static init(){ 
         storage.getJSON('teams', function(value, key){
             if (value){
                 teams = value;
             }else{
-                teams = YAML.load(__dirname + '/../data/default-teams.yml');
+                TeamsService.loadDefault();
             }
         });
     }
     
-    static reset(){
-        teams = YAML.load(__dirname + '/../data/default-teams.yml');
+    static reset($){
+        $.sendMessage('Reset teams');
+        TeamsService.loadDefault();
         TeamsService.saveTeams(teams);
+        TeamsService.showTeamsMembers($);
     }
 
     static saveTeams(teams){
         storage.setJSON('teams', teams);
     }
     
-    static showTeamsScores($, teams) {
-       // TODO
-        // let msg = 'Teams:\n' + teams.map((team, i) => 'team (id=' + team.id + ')').join('\n');
-        // .map((team, i) => 'team (id=' + team.id + ')').join('\n'));
-        // $.sendMessage(msg)
+    static showTeamsScores($) {
+        let msg = 'Teams scores:\n' + Object.values(teams).map((team, i) => team.name + ': ' + team.score).join('\n');
+        $.sendMessage(msg)
+    }
+
+    static showTeamsMembers($) {
+
+        let msg = 'Teams:\n' + Object.values(teams)
+            .map((team, i) => team.name + ': ' +  team.members.map((member, i) => 'member (id=' + member.id + ')').join('\n'))
+        .join('\n');
+        $.sendMessage(msg)
     }
     
     static listTeams($) {
@@ -48,26 +65,40 @@ class TeamsController extends TelegramBaseController {
 
     get routes() {
         return {
-            // '/teams-list': 'listTeams',
             '/teams': 'help',
+            '/teams-scores': 'showTeamsScores',
+            '/teams-members': 'showTeamsMembers',
+            '/teams-reset': 'reset',
         }
     }
 
     help($) {
         $.sendMessage('/teams: help \
-            \n/teams-list: list teams');
+            \n/teams-scores: show team scores \
+            \n/teams-members: show team members \
+            \n/teams-reset: reset from default');
         TeamsService.listTeams($);
     }
     
+    showTeamsScores($) {
+        BotTools.UsersAndSessionsRegister($);
+
+        TeamsService.showTeamsScores($);
+    }    
+    showTeamsMembers($) {
+        BotTools.UsersAndSessionsRegister($);
+
+        TeamsService.showTeamsMembers($);
+    }
+    
     reset($) {
-        console.log('\nSKIP QUESTION...')
         BotTools.UsersAndSessionsRegister($);
 
         if (!BotTools.checkAdminAccess($)) {
             return false;
         }
 
-        TeamsService.reset();
+        TeamsService.reset($);
     }
      
 }
