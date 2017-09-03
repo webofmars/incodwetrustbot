@@ -14,6 +14,12 @@ class SessionsManager {
   * @param: sessionId
   **/
   add(sessionId) {
+
+    if (sessionId < 0) {
+      console.log("SessionsManager: add: skipping group id: " + + sessionId.toString())
+      return
+    }
+
     if (this._sessions.indexOf(sessionId.toString()) < 0) {
       console.log("sessions not already registred, adding " + sessionId.toString() + "to session list")
       this._sessions.push(sessionId)
