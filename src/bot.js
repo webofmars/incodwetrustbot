@@ -18,6 +18,7 @@ const QuizzService = Quizz.QuizzService;
 const Teams = require('./bot/teams.js');
 const TeamsController = Teams.TeamsController;
 const TeamsService = Teams.TeamsService;
+const DataModels = require('./lib/DataModels.js')
 
 const dlurl = 'https://api.telegram.org/file/bot';
 
@@ -27,6 +28,8 @@ const TelegramBaseCallbackQueryController = Telegram.TelegramBaseCallbackQueryCo
 const BaseScopeExtension = Telegram.BaseScopeExtension
 const InlineQueryResultLocation = Telegram.InlineQueryResultLocation
 const InputFile = Telegram.InputFile
+
+const datamodels = DataModels.load()
 
 /* Express web component */
 const express = require('express');
@@ -73,6 +76,27 @@ redisdb.on('ready', function () {
       }
     }
   })
+});
+
+// work with data models
+redisdb.on('ready',  function () {
+
+  // create sample data
+  // TODO: this is just samples need to wrap that in a JSOn2YAML file
+  var eventctrl = require('./lib/controllers/events.js');
+  eventctrl.init()
+  var event1 = eventctrl.addEvent('{ "name": "1st event", "start": "201708221000", "end": "201708221000", "place": { "name": "place1", "longitude": 42.3, "latitude": 42.3 } }');
+
+  var events = eventctrl.getEventsList({});
+  console.log("DEBUG: events:" + JSON.stringify(events));
+  events.forEach(function (event) {
+    console.log("event: " + event.id);
+    console.log("event: " + event.p('name'))
+    console.log("event place name : " + event.getPlaceName());
+    console.log("event place longitude : " + event.getPlaceLongitude());
+    console.log("event place latitude : " + event.getPlaceLatitude());
+  });
+
 });
 
 /* -----------------------------------------------------------------------------
@@ -238,8 +262,6 @@ class SetScoreController extends TelegramBaseController {
     redisdb.set('icwt.scores', JSON.stringify(scores));
   }
 }
-
-
 
 class StartGameController extends TelegramBaseController {
 
