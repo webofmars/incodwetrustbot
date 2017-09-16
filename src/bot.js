@@ -18,6 +18,9 @@ const QuizzService = Quizz.QuizzService;
 const Teams = require('./bot/teams.js');
 const TeamsController = Teams.TeamsController;
 const TeamsService = Teams.TeamsService;
+const User = require('./bot/users.js');
+const UserController = User.UserController;
+const UserService = User.UserService;
 
 const dlurl = 'https://api.telegram.org/file/bot';
 
@@ -34,6 +37,7 @@ const app = express();
 
 QuizzService.init();
 TeamsService.init();
+UserService.init();
 
 app.set('views', __dirname + '/node-gallery/views');
 app.set('view engine', 'ejs');
@@ -324,6 +328,7 @@ version - show the bot version
 xxxxxxxx - there is some hidden commands ... find it :-)
 */
 BotTools.tg().router
+  .when(['/users', '/users-reset'], new UserController())
   .when(['/quizz-restart :quizzname', '/quizz-start :quizzname', '/quizz-skip', '/quizz'], new QuizzController())
   .when(['/teams-members', '/teams-scores', '/teams-reset', '/teams'], new TeamsController())
   .when([/^\/start$/], new HelpController())

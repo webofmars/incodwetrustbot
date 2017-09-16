@@ -59,6 +59,14 @@ class TeamsService {
     static listTeams($) {
         $.sendMessage('Available teams: ' + Object.keys(teams).join(', '));
     }
+    static checkUserTeam($){
+        console.log('\n=> Message from: ', $.message.from);
+        // _id: 411495234,
+        // _firstName: 'Toub',
+        // _lastName: null,
+        // _username: 'toubb'
+        
+    }
 }
 
 class TeamsController extends TelegramBaseController {
@@ -78,6 +86,7 @@ class TeamsController extends TelegramBaseController {
             \n/teams-members: show team members \
             \n/teams-reset: reset from default');
         TeamsService.listTeams($);
+        TeamsService.checkUserTeam($);
     }
     
     showTeamsScores($) {
