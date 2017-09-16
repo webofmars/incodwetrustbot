@@ -44,11 +44,15 @@ class EventsController {
 
     // FIXME: this is not working
     // should use calbacks or promises
-    static getEventsList(filter) {
+    static getEventsList(filter, cb) {
         // should return a list of events persisted
         var eventsList
-        EventModel.find({}, function (err, events) { console.log(JSON.stringify("aaa" + events)); eventsList = events } );
-        console.log(JSON.stringify(eventsList))
+        EventModel.findAndLoad({}, function(err, events){
+            console.log(JSON.stringify("[EventsController] getEventsList:", events)); 
+            eventsList = events;
+            console.log(JSON.stringify(eventsList))
+            cb(err, events);
+        });
     }
 }
 
