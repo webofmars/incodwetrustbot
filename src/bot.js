@@ -87,14 +87,16 @@ redisdb.on('ready',  function () {
   eventctrl.init()
   var event1 = eventctrl.addEvent('{ "name": "1st event", "start": "201708221000", "end": "201708221000", "place": { "name": "place1", "longitude": 42.3, "latitude": 42.3 } }');
 
-  var events = eventctrl.getEventsList({});
-  console.log("DEBUG: events:" + JSON.stringify(events));
-  events.forEach(function (event) {
-    console.log("event: " + event.id);
-    console.log("event: " + event.p('name'))
-    console.log("event place name : " + event.getPlaceName());
-    console.log("event place longitude : " + event.getPlaceLongitude());
-    console.log("event place latitude : " + event.getPlaceLatitude());
+  eventctrl.getEventsList({}, function(error, events){
+    console.log("DEBUG: events:" + JSON.stringify(events));
+    events.forEach(function (event, i) {
+      console.log("event: ", event);
+      console.log("event id: " + event.id);
+      console.log("event name: " + event.p('name'))
+      console.log("event place name : " + event.getPlaceName());
+      console.log("event place longitude : " + event.getPlaceLongitude());
+      console.log("event place latitude : " + event.getPlaceLatitude());
+    });
   });
 
 });
