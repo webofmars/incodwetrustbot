@@ -1,3 +1,4 @@
+
 /******************************************************************************
 references :
   - http://core.telegram.org/bots/api
@@ -7,18 +8,21 @@ references :
 'use strict'
 
 const redisdb = require('./lib/redisdb');
+const RedisStorage = require('./lib/redis-storage');
 const Config = require('./lib/Config.js');
 const BotTools = require('./lib/BotTools.js');
 const UsersDB = require('./lib/UsersDB.js');
 const dl = require('download-file');
 const Telegram = require('telegram-node-bot');
-const Quizz = require('./bot/quizz.js');
+const Quizz = require('./lib/controllers/quizz.js');
+const EventController = require('./lib/controllers/events.js');
 const QuizzController = Quizz.QuizzController;
 const QuizzService = Quizz.QuizzService;
-const Teams = require('./bot/teams.js');
+const Teams = require('./lib/controllers/teams.js');
 const TeamsController = Teams.TeamsController;
 const TeamsService = Teams.TeamsService;
 const DataModels = require('./lib/DataModels.js')
+const UserController = require('./lib/controllers/users.js');
 
 const dlurl = 'https://api.telegram.org/file/bot';
 
@@ -35,8 +39,13 @@ const datamodels = DataModels.load()
 const express = require('express');
 const app = express();
 
-QuizzService.init();
-TeamsService.init();
+const userController = new UserController();
+
+RedisStorage.init().then(()=>{
+  QuizzService.init();
+  TeamsService.init();
+  userController.init();
+});
 
 app.set('views', __dirname + '/node-gallery/views');
 app.set('view engine', 'ejs');
@@ -79,23 +88,22 @@ redisdb.on('ready', function () {
 });
 
 // work with data models
-redisdb.on('ready',  function () {
+redisdb.on('ready', function () {
 
   // create sample data
   // TODO: this is just samples need to wrap that in a JSOn2YAML file
-  var eventctrl = require('./lib/controllers/events.js');
-  eventctrl.init()
-  var event1 = eventctrl.addEvent('{ "name": "1st event", "start": "201708221000", "end": "201708221000", "place": { "name": "place1", "longitude": 42.3, "latitude": 42.3 } }');
+  EventController.init()
+  // var event1 = EventController.addEvent('{ "name": "1st event", "start": "201708221000", "end": "201708221000", "place": { "name": "place1", "longitude": 42.3, "latitude": 42.3 } }');
 
-  eventctrl.getEventsList({}, function(error, events){
-    console.log("DEBUG: events:" + JSON.stringify(events));
+  EventController.getEventsList({}, function (error, events) {
+    console.log("DEBUG: events:", events.length);
     events.forEach(function (event, i) {
-      console.log("event: ", event);
-      console.log("event id: " + event.id);
-      console.log("event name: " + event.p('name'))
-      console.log("event place name : " + event.getPlaceName());
-      console.log("event place longitude : " + event.getPlaceLongitude());
-      console.log("event place latitude : " + event.getPlaceLatitude());
+      // console.log("event: ", event);
+      // console.log("event id: " + event.id);
+      // console.log("event name: " + event.p('name'))
+      // console.log("event place name : " + event.getPlaceName());
+      // console.log("event place longitude : " + event.getPlaceLongitude());
+      // console.log("event place latitude : " + event.getPlaceLatitude());
     });
   });
 
@@ -188,7 +196,7 @@ class ScoresController extends TelegramBaseController {
         $.sendMessage("*Voici les scores*:\n" + reply.toString().replace(/\{/g, '').replace(/\}/g, '').replace(/:/g, ' : ').replace(/"/g, '').replace(/,/g, "\n"), {
           parse_mode: 'Markdown'
         });
-      }else{
+      } else {
         $.sendMessage("Les scores ne sont pas disponibles.");
       }
     });
@@ -348,6 +356,7 @@ version - show the bot version
 xxxxxxxx - there is some hidden commands ... find it :-)
 */
 BotTools.tg().router
+  .when(['/users-reset', '/users'], userController)
   .when(['/quizz-restart :quizzname', '/quizz-start :quizzname', '/quizz-skip', '/quizz'], new QuizzController())
   .when(['/teams-members', '/teams-scores', '/teams-reset', '/teams'], new TeamsController())
   .when([/^\/start$/], new HelpController())
