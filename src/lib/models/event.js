@@ -2,6 +2,8 @@
 
 const nohm = require('nohm').Nohm;
 
+console.log("+ event.js declare model ...")
+
 module.exports = nohm.model('EventModel', {
   idGenerator: 'increment',
   properties: {

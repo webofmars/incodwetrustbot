@@ -1,7 +1,7 @@
 'use strict'
 
-const nohm       = require('nohm').Nohm;
-const redisdb    = require('../redisdb.js');
+const nohm = require('nohm').Nohm;
+const redisdb = require('../redisdb.js');
 const EventModel = require('../models/event.js')
 
 class EventsController {
@@ -33,12 +33,14 @@ class EventsController {
         var event = nohm.factory('EventModel');
         event.p(JSON.parse(value))
         console.log('+ persisting object in db')
-        event.save(function (err) { if (err) {
-            console.log("[ERROR] : nohm persist :")
-            console.log("error: " + err)
-            console.log("object errors: " + JSON.stringify(event.errors));
-            console.log("object: " + JSON.stringify(event))
-        } });
+        event.save(function (err) {
+            if (err) {
+                console.log("[ERROR] : nohm persist :")
+                console.log("error: " + err)
+                console.log("object errors: " + JSON.stringify(event.errors));
+                console.log("object: " + JSON.stringify(event))
+            }
+        });
         return event;
     }
 
@@ -46,11 +48,11 @@ class EventsController {
     // should use calbacks or promises
     static getEventsList(filter, cb) {
         // should return a list of events persisted
-        var eventsList
-        EventModel.findAndLoad({}, function(err, events){
-            console.log(JSON.stringify("[EventsController] getEventsList:", events)); 
+        var eventsList;
+        EventModel.findAndLoad({}, function (err, events) {
+            console.log(JSON.stringify("[EventsController] getEventsList:", events.length));
             eventsList = events;
-            console.log(JSON.stringify(eventsList))
+            // console.log(JSON.stringify(eventsList))
             cb(err, events);
         });
     }

@@ -11,19 +11,19 @@ function getRedis(key, callback){
             exit
         };
         if (reply) {
-            console.log('storage.getRedis:', reply);
+            // console.log('storage.getRedis:', reply);
             if (typeof callback === 'function'){
                 callback(reply, key);
             }
         }else{
-            console.log('storage.getRedis:', null);
+            // console.log('storage.getRedis:', null);
             callback(null, key);
         }
     });
 };
 
 function setRedis(key, value){
-    console.log('setRedis:', key, value);
+    // console.log('setRedis:', key, value);
     redisdb.set(key, value);
 }
 
@@ -34,12 +34,12 @@ module.exports = {
                 // parse JSON
                 value = JSON.parse(value);
             }
-            console.log('getJSON:', value);
+            // console.log('getJSON:', value);
             callback(value, key);
         });
     },
     setJSON: function(key, value){
-        console.log('setJSON:', key, value);
+        // console.log('setJSON:', key, value);
         // stringify JSON and save
         this.set(key, JSON.stringify(value));
     },

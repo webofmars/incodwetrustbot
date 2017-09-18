@@ -1,9 +1,9 @@
 'use strict'
 
-const storage = require('../lib/storage');
-const BotTools = require('../lib/BotTools.js');
-const UsersDB = require('../lib/UsersDB.js');
-const SessionsManager = require('../lib/SessionsManager.js');
+const oldStorage =require('../old-storage');
+const BotTools = require('../BotTools.js');
+const UsersDB = require('../UsersDB.js');
+const SessionsManager = require('../SessionsManager.js');
 
 const Telegram = require('telegram-node-bot');
 const TelegramBaseController = Telegram.TelegramBaseController
@@ -17,15 +17,15 @@ class QuizzService {
 
     static init(){
         
-        storage.getJSON('availables-quizz', function(value, key){
+        oldStorage.getJSON('availables-quizz', function(value, key){
             if (value){
                 availablesQuizz = value;
             }else{
-                availablesQuizz = YAML.load(__dirname + '/../data/default-quizz.yml');
+                availablesQuizz = YAML.load(__dirname + '/../../data/default-quizz.yml');
             }
         });
         
-        storage.getJSON('actives-quizz', function(value, key){
+        oldStorage.getJSON('actives-quizz', function(value, key){
             if (value){
                 activesQuizz = value;
             }else{
@@ -39,15 +39,15 @@ class QuizzService {
 
         availablesQuizz = YAML.load(__dirname + '/../data/default-quizz.yml');
             
-        storage.setJSON('availables-quizz', availablesQuizz);
+        oldStorage.setJSON('availables-quizz', availablesQuizz);
         
         activesQuizz = {};
-        storage.setJSON('actives-quizz', activesQuizz);
+        oldStorage.setJSON('actives-quizz', activesQuizz);
 
     }
 
     static saveQuizz(quizz){
-        storage.setJSON('actives-quizz', activesQuizz);
+        oldStorage.setJSON('actives-quizz', activesQuizz);
     }
 
     static startQuizz($) {

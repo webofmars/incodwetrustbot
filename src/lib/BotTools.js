@@ -5,6 +5,8 @@ const UsersDB = require('./UsersDB.js');
 const dl = require('download-file');
 const Telegram = require('telegram-node-bot');
 const redisdb = require('./redisdb');
+const RedisStorage = require('./redis-storage');
+const UserModel = require('./models/user.js')
 
 /* -----------------------------------------------------------------------------
  * Class with static functions used by the bot itself
@@ -75,7 +77,20 @@ class BotTools {
 
     static UsersAndSessionsRegister($) {
         ActiveSessions.add($.message.chat.id)
-        users.register($)
+        // users.register($)
+        RedisStorage.findOne(UserModel, {
+            id: $.message.from.id
+        }).then(user => {
+            console.log('Create user:', $.message.from, user);
+            if (!user) {
+                RedisStorage.createOne('UserModel', {
+                    id: $.message.from.id,
+                    username: $.message.from.username,
+                    firstName: $.message.from.firstName,
+                    lastName: $.message.from.lastName
+                });
+            }
+        });
         redisdb.sadd('sessions', ActiveSessions.sessions(), redisdb.print)
     }
 
