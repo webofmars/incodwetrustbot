@@ -1,5 +1,4 @@
 const Config = require('./Config.js');
-
 const redisdb = require('./redisdb');
 
 var memory = {};

@@ -3,6 +3,7 @@
 const nohm = require('nohm').Nohm;
 const redisdb = require('../redisdb.js');
 const EventModel = require('../models/event.js')
+const YAML = require('yamljs');
 
 class EventsController {
 
@@ -10,11 +11,9 @@ class EventsController {
 
         console.log("+ EventsController starting ...")
 
-        // set the redis client
-        nohm.setClient(redisdb)
-
-        // set the redis prefix for persistence
-        nohm.setPrefix('incodwetrust')
+        // set the redis client & preferences
+        nohm.setClient(redisdb);
+        nohm.setPrefix('incodwetrust');
 
         // set the error function
         nohm.logError = function (err) {
@@ -22,10 +21,27 @@ class EventsController {
                 console.log("[ERROR] : nohm processing error: " + JSON.stringify(err))
             }
         }
+
+        // load events from yaml files
+        this.getEventsList({}, function (err, events) {
+            if (events.length < 1) {
+                EventsController.loadDefaults();
+            }
+        });
     }
 
     static loadDefaults() {
-        // should import YAML if there is no data yet
+        const defaultEvents = YAML.load(__dirname + '/../../data/default-events.yml');
+        var events = Object.keys(defaultEvents).map(key => Object.assign(defaultEvents[key], {
+            name: key
+        }));
+        console.log("Default Events Loaded : " + JSON.stringify(events))
+
+        events.forEach(function (event) {
+            var eventParsed = JSON.stringify(event);
+            console.log("importing event : " + eventParsed)
+            EventsController.addEvent(eventParsed)
+        });
     }
 
     static addEvent(value) {
@@ -44,15 +60,12 @@ class EventsController {
         return event;
     }
 
-    // FIXME: this is not working
-    // should use calbacks or promises
     static getEventsList(filter, cb) {
         // should return a list of events persisted
         var eventsList;
         EventModel.findAndLoad({}, function (err, events) {
             console.log(JSON.stringify("[EventsController] getEventsList:", events.length));
             eventsList = events;
-            // console.log(JSON.stringify(eventsList))
             cb(err, events);
         });
     }

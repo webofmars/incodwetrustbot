@@ -1,0 +1,8 @@
+event1:
+  name: premier event
+  start: 201708221000
+  end: 201708221000
+  place:
+    name: "place1"
+    longitude: 42.3
+    latitude: 42.3

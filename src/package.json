@@ -4,8 +4,8 @@
   "homepage": "https://github.com/webofmars/incodwetrustbot",
   "description": "In Cod We Trust is a bewelcome (bewelcome.org) event, taking place in Marseille, France. This bot will interract with the participants for the great photo contest",
   "bugs": {
-    "url" : "https://github.com/webofmars/incodwetrustbot/issues",
-    "email" : "frederic@webofmars.com"
+    "url": "https://github.com/webofmars/incodwetrustbot/issues",
+    "email": "frederic@webofmars.com"
   },
   "main": "bot.js",
   "dependencies": {
@@ -27,7 +27,10 @@
     "email": "frederic@webofmars.com"
   },
   "contributors": [
-    {"name": "Nicolas Toublanc", "email": "nicolas@toublanc.org"}
+    {
+      "name": "Nicolas Toublanc",
+      "email": "nicolas@toublanc.org"
+    }
   ],
   "license": "Apache-2.0"
 }

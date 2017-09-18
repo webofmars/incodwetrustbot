@@ -87,26 +87,9 @@ redisdb.on('ready', function () {
   })
 });
 
-// work with data models
+// Load all MVC controllers
 redisdb.on('ready', function () {
-
-  // create sample data
-  // TODO: this is just samples need to wrap that in a JSOn2YAML file
   EventController.init()
-  // var event1 = EventController.addEvent('{ "name": "1st event", "start": "201708221000", "end": "201708221000", "place": { "name": "place1", "longitude": 42.3, "latitude": 42.3 } }');
-
-  EventController.getEventsList({}, function (error, events) {
-    console.log("DEBUG: events:", events.length);
-    events.forEach(function (event, i) {
-      // console.log("event: ", event);
-      // console.log("event id: " + event.id);
-      // console.log("event name: " + event.p('name'))
-      // console.log("event place name : " + event.getPlaceName());
-      // console.log("event place longitude : " + event.getPlaceLongitude());
-      // console.log("event place latitude : " + event.getPlaceLatitude());
-    });
-  });
-
 });
 
 /* -----------------------------------------------------------------------------
@@ -218,6 +201,26 @@ class ContactsController extends TelegramBaseController {
 class PlacesController extends TelegramBaseController {
   handle($) {
     BotTools.UsersAndSessionsRegister($)
+
+    EventController.getEventsList({}, function (error, events) {
+      console.log("DEBUG: events:", events.length);
+      events.forEach(function (event, i) {
+        console.log("event id: " + event.id);
+        console.log("event name: " + event.p('name'))
+        console.log("event place name : " + event.getPlaceName());
+        console.log("event place longitude : " + event.getPlaceLongitude());
+        console.log("event place latitude : " + event.getPlaceLatitude());
+        $.sendVenue(
+          event.getPlaceLongitude(),
+          event.getPlaceLatitude(),
+          event.p('name') + ' @' + event.getPlaceName()
+            + '\nstart at: ' + event.p('start')
+            + '\nend at: '   + event.p('end')
+            + '\naddress: '  + 'to be implemented'
+        );
+      });
+    });
+
     $.sendVenue(43.298829, 5.383786, "Apero @Music Kiosk | " + 'Friday 30th, ' + '18h', '49 allée Léon Gambetta');
 
     $.sendVenue(43.286325, 5.383802, 'Hike @Castellane Metro Station | ' + 'Saturday 1st, ' + '9h30', 'Place Castellane')

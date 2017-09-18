@@ -15,7 +15,7 @@ class TeamsService {
 
     static loadDefault(){
         // load default teams from yaml file
-        const defaultTeams = YAML.load(__dirname + '/../data/default-teams.yml');
+        const defaultTeams = YAML.load(__dirname + '/../../data/default-teams.yml');
         // add name attribute from key
         teams = Object.keys(defaultTeams).map(key => Object.assign(defaultTeams[key], {
             name: key
