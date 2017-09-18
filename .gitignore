@@ -1,9 +1,13 @@
 # env configuration & secrets
-**/*.env
-**/.env
+.env
+.env-*
 **/*.secrets
 **/.secrets
 dev.env.sh
+
+# projetc stuff
+/notes.txt
+/todo.txt
 
 # Junks files
 **/.DS_Store
@@ -57,6 +61,3 @@ photos/
 # redis data
 redis/
 games/
-
-# env vars
-.env
