@@ -56,7 +56,9 @@ jspm_packages
 .node_repl_history
 
 # node-gallery dir
-photos/
+!src/photos
+!src/photos/.gitkeep
+src/photos/*
 
 # redis data
 redis/

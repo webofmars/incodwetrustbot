@@ -1,35 +1,35 @@
 q1:
-    questions:
-        - label: En quelle année blablabla?
-          choices: 
-            - 1950
-            - 1984
-            - 1999
-            - 2008
-          answers:
-            - 3
-        - label: De quelle couleur était le cheval noir d'Henri IV?
-          choices: 
-            - blanc
-            - noir
-            - marron
-            - gris
-          answers:
-            - 2
+  questions:
+    - label: En quelle année blablabla?
+      choices:
+        - 1950
+        - 1984
+        - 1999
+        - 2008
+      answers:
+        - 3
+    - label: De quelle couleur était le cheval noir d'Henri IV?
+      choices:
+        - blanc
+        - noir
+        - marron
+        - gris
+      answers:
+        - 2
 q2:
-    questions:
-        - label: Combien?
-          choices: 
-            - environ 350
-            - à peu près 500
-            - plus de 800
-          answers:
-            - 3
-        - label: De quelle couleur était le cheval blanc d'Henri IV?
-          choices: 
-            - blanc
-            - noir
-            - marron
-            - gris
-          answers:
-            - 1
+  questions:
+    - label: Combien?
+      choices:
+        - environ 350
+        - à peu près 500
+        - plus de 800
+      answers:
+        - 3
+    - label: De quelle couleur était le cheval blanc d'Henri IV?
+      choices:
+        - blanc
+        - noir
+        - marron
+        - gris
+      answers:
+        - 1

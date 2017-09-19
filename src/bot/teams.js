@@ -22,7 +22,7 @@ class TeamsService {
         }));
     }
 
-    static init(){ 
+    static init(){
         storage.getJSON('teams', function(value, key){
             if (value){
                 teams = value;
@@ -31,7 +31,7 @@ class TeamsService {
             }
         });
     }
-    
+
     static reset($){
         $.sendMessage('Reset teams');
         TeamsService.loadDefault();
@@ -42,7 +42,7 @@ class TeamsService {
     static saveTeams(teams){
         storage.setJSON('teams', teams);
     }
-    
+
     static showTeamsScores($) {
         let msg = 'Teams scores:\n' + Object.values(teams).map((team, i) => team.name + ': ' + team.score).join('\n');
         $.sendMessage(msg)
@@ -55,7 +55,7 @@ class TeamsService {
         .join('\n');
         $.sendMessage(msg)
     }
-    
+
     static listTeams($) {
         $.sendMessage('Available teams: ' + Object.keys(teams).join(', '));
     }
@@ -65,32 +65,53 @@ class TeamsController extends TelegramBaseController {
 
     get routes() {
         return {
-            '/teams': 'help',
-            '/teams-scores': 'showTeamsScores',
-            '/teams-members': 'showTeamsMembers',
-            '/teams-reset': 'reset',
+            '/teams :action': 'handler',
+            '/teams'        : 'handler'
+        }
+    }
+
+    handler($) {
+        console.log('Teams: action: ' + JSON.stringify($.query.action));
+        switch($.query.action) {
+            case 'help':
+                this.help($);
+                break;
+            case 'members':
+                this.showTeamsMembers($);
+                break;
+            case 'reset':
+                this.reset($);
+                break;
+            case 'scores':
+                this.showTeamsScores($);
+                break;
+            default:
+                this.help($);
+                break;
         }
     }
 
     help($) {
-        $.sendMessage('/teams: help \
-            \n/teams-scores: show team scores \
-            \n/teams-members: show team members \
-            \n/teams-reset: reset from default');
+        $.sendMessage(
+            '*/teams help* - this help message\n'    +
+            '*/teams scores* - show team scores\n'   +
+            '*/teams members* - show team members\n' +
+            '*/teams reset* - reset teams _(admins only)_\n', { 'parse_mode' : 'Markdown'});
         TeamsService.listTeams($);
     }
-    
+
     showTeamsScores($) {
         BotTools.UsersAndSessionsRegister($);
 
         TeamsService.showTeamsScores($);
-    }    
+    }
+
     showTeamsMembers($) {
         BotTools.UsersAndSessionsRegister($);
 
         TeamsService.showTeamsMembers($);
     }
-    
+
     reset($) {
         BotTools.UsersAndSessionsRegister($);
 
@@ -100,7 +121,7 @@ class TeamsController extends TelegramBaseController {
 
         TeamsService.reset($);
     }
-     
+
 }
 
 module.exports = {

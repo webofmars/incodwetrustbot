@@ -19,8 +19,6 @@ const Teams = require('./bot/teams.js');
 const TeamsController = Teams.TeamsController;
 const TeamsService = Teams.TeamsService;
 
-const dlurl = 'https://api.telegram.org/file/bot';
-
 const TelegramBaseController = Telegram.TelegramBaseController
 const TelegramBaseInlineQueryController = Telegram.TelegramBaseInlineQueryController
 const TelegramBaseCallbackQueryController = Telegram.TelegramBaseCallbackQueryController
@@ -140,10 +138,11 @@ class GalleryController extends TelegramBaseController {
   }
 }
 
+// FIXME: seems broken
 class DebugController extends TelegramBaseController {
   handle($) {
     BotTools.UsersAndSessionsRegister($)
-    $.sendMessage('Users    = ' + users.dump())
+    $.sendMessage('Users    = ' + UsersDB.dump())
     $.sendMessage('Sessions = ' + ActiveSessions.sessions())
   }
 }
@@ -162,22 +161,21 @@ class ScoresController extends TelegramBaseController {
         $.sendMessage("*Voici les scores*:\n" + reply.toString().replace(/\{/g, '').replace(/\}/g, '').replace(/:/g, ' : ').replace(/"/g, '').replace(/,/g, "\n"), {
           parse_mode: 'Markdown'
         });
-      }else{
+      } else {
         $.sendMessage("Les scores ne sont pas disponibles.");
       }
     });
   }
-
 }
 
 class ContactsController extends TelegramBaseController {
   handle($) {
     BotTools.UsersAndSessionsRegister($)
-    $.sendContact("+33 6 52 77 53 54", "Frederic")
-    $.sendContact("+33 6 85 53 48 44", "Mary")
-    $.sendContact("+33 6 58 02 07 06", "Orianne")
-    $.sendContact("+33 6 62 68 90 65", "Vincent")
-    $.sendContact("+33 6 58 41 48 86", "Kristell")
+    $.sendContact("+33 6 52 77 53 54", "Frederic | @fredLight | f_like_fire ")
+    $.sendContact("+33 6 58 02 07 06", "Orianne  | @Orianne55 | lifeisadream" )
+    $.sendContact("+33 6 58 41 48 86", "Kristell | @KrisTLG   | krisbw      ")
+    $.sendContact("+33 6 26 35 52 91", "Remy     | @Remy_138  | latchoska   ")
+    $.sendContact("+33 6 13 87 96 74", "Fanny    | @FanitaP   | fanita      ")
   }
 }
 
@@ -239,8 +237,6 @@ class SetScoreController extends TelegramBaseController {
   }
 }
 
-
-
 class StartGameController extends TelegramBaseController {
 
   handle($) {
@@ -272,11 +268,11 @@ class FunCodController extends TelegramBaseController {
   handle($) {
     console.log('+++ FunCodController')
     BotTools.UsersAndSessionsRegister($)
-    var choice = Math.floor((Math.random() * 3) + 1);
+    var choice = Math.floor((Math.random() * 4) + 1);
     switch (choice) {
       case 1:
         console.log('+ sending photo')
-        $.sendPhoto(InputFile.byUrl('http://lesturgeons.blogs.nouvelobs.com/media/01/00/278174761.jpg', 'cod-styleeee.jpg'))
+        $.sendPhoto(InputFile.byUrl('http://www.hogylures.com/wp-content/uploads/2011/10/Cape-Cod-Cod2-Small.jpg', 'cod-styleeee.jpg'))
         break;
       case 2:
         console.log('+ sending video')
@@ -286,6 +282,9 @@ class FunCodController extends TelegramBaseController {
         console.log('+ sending audio')
         $.sendMessage('http://www.deezer.com/track/540175');
         break;
+      case 4:
+        console.log('+ sending meme')
+        $.sendMessage('https://memegenerator.net/img/instances/500x/80422861/wtf-man-in-cod-we-trust.jpg');
     }
   }
 }
@@ -324,8 +323,6 @@ version - show the bot version
 xxxxxxxx - there is some hidden commands ... find it :-)
 */
 BotTools.tg().router
-  .when(['/quizz-restart :quizzname', '/quizz-start :quizzname', '/quizz-skip', '/quizz'], new QuizzController())
-  .when(['/teams-members', '/teams-scores', '/teams-reset', '/teams'], new TeamsController())
   .when([/^\/start$/], new HelpController())
   .when([/^\/help$/], new HelpController())
   .when([/^\/ping$/], new PingController())
@@ -337,12 +334,20 @@ BotTools.tg().router
   .when([/^\/programm$/], new ProgrammController())
   .when([/^\/playlist$/], new PlaylistController())
   .when([/^\/version$/], new VersionController())
+
   // Hidden functions
   .when([/^\/debug$/], new DebugController())
   .when(['/scoreset :team :delta'], new SetScoreController())
   .when(['/gamestart :gameid'], new StartGameController())
   .when([/^\/giligili$/], new FunChatouilleController())
   .when([/^\/cod$/], new FunCodController())
+  .when([
+    '/quizz :action :quizzname',
+    '/quizz :action',
+    '/quizz'], new QuizzController())
+  .when([
+    '/teams :action',
+    '/teams'], new TeamsController())
   .otherwise(new DefaultController())
 
 console.log('Listing for request on Telegram API ...')
