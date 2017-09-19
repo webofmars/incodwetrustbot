@@ -25,6 +25,7 @@ class BotTools {
     static tg() {
         return tg;
     }
+
     static scores() {
         return scores;
     }

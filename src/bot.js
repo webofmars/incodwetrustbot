@@ -81,19 +81,20 @@ class HelpController extends TelegramBaseController {
 
   handle($) {
     BotTools.UsersAndSessionsRegister($)
-    $.sendMessage("Usage: \n\
-        /start : start playing with me \n \
-        /help : display help message \n \
-        /ping : check if i'am still alive ;-) \n \
-        /photo : send me a photo \n \
-        /gallery : show me the onlmine photo gallery of the event \n \
-        /scores : show me the event scores \n \
-        /contacts : show me the orgas contact \n \
-        /places : show me the meeting point on a map \n \
-        /programm : send me again the programm document \n \
-        /playlist : send me some good sound of Marseille \n \
-        /version : show the bot version \n \
-        /xxxxxxxx : there is some hidden commands ... find it :-)");
+    $.sendMessage('Usage: \n' +
+      '/start - start playing with me\n'                   +
+      '/help - display help message\n'                     +
+      '/ping - check if i\'am still alive ;-)\n'           +
+      '/programm - send me again the programm document\n'  +
+      '/contacts - show me the orgas contact\n'            +
+      '/places - show me the meeting point on a map\n'     +
+      '/photo - send me a photo\n'                         +
+      '/gallery - show me the onlmine photo gallery of the event\n' +
+      '/teams - show teams & scores\n'                     +
+      '/quizz - show the quizzs commands\n'                +
+      '/version - show the bot version\n'                  +
+      '/xxxxxxxx - there is some hidden commands ... find it :-)\n'
+    )
   }
 }
 
@@ -138,12 +139,11 @@ class GalleryController extends TelegramBaseController {
   }
 }
 
-// FIXME: seems broken
+// FIXME: seems broken - ActiveSessions, UsersDB, SessionManager : need refacto
 class DebugController extends TelegramBaseController {
   handle($) {
     BotTools.UsersAndSessionsRegister($)
     $.sendMessage('Users    = ' + UsersDB.dump())
-    $.sendMessage('Sessions = ' + ActiveSessions.sessions())
   }
 }
 
@@ -313,12 +313,13 @@ class PlaylistController extends TelegramBaseController {
 start - start playing with me
 help - display help message
 ping - check if i'am still alive ;-)
-photo - send me a photo
-gallery - show me the onlmine photo gallery of the event
-scores - show me the event scores
+programm - send me again the programm document
 contacts - show me the orgas contact
 places - show me the meeting point on a map
-programm - send me again the programm document
+photo - send me a photo
+gallery - show me the onlmine photo gallery of the event
+teams - show teams & scores
+quizz - show the quizzs commands
 version - show the bot version
 xxxxxxxx - there is some hidden commands ... find it :-)
 */
@@ -336,9 +337,9 @@ BotTools.tg().router
   .when([/^\/version$/], new VersionController())
 
   // Hidden functions
-  .when([/^\/debug$/], new DebugController())
-  .when(['/scoreset :team :delta'], new SetScoreController())
-  .when(['/gamestart :gameid'], new StartGameController())
+  .when(['/debug'], new DebugController())
+  //.when(['/scoreset :team :delta'], new SetScoreController())
+  //.when(['/gamestart :gameid'], new StartGameController())
   .when([/^\/giligili$/], new FunChatouilleController())
   .when([/^\/cod$/], new FunCodController())
   .when([

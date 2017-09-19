@@ -8,34 +8,34 @@ const SessionsManager = require('../lib/SessionsManager.js');
 const Telegram = require('telegram-node-bot');
 const TelegramBaseController = Telegram.TelegramBaseController
 const YAML = require('yamljs');
+const sleep = require('sleep');
 
 let availablesQuizz = {};
-
 let activesQuizz = {};
 
 class QuizzService {
 
-    static init(){
+    static init() {
 
         storage.getJSON('availables-quizz', function(value, key){
-            if (value){
+            if (value) {
                 availablesQuizz = value;
-            }else{
+            } else {
                 availablesQuizz = YAML.load(__dirname + '/../data/default-quizz.yml');
             }
         });
 
         storage.getJSON('actives-quizz', function(value, key){
-            if (value){
+            if (value) {
                 activesQuizz = value;
-            }else{
+            } else {
                 activesQuizz = {};
             }
         });
 
     }
 
-    static reset(){
+    static reset() {
 
         availablesQuizz = YAML.load(__dirname + '/../data/default-quizz.yml');
 
@@ -70,7 +70,7 @@ class QuizzService {
                 status: 'active'
             }, selectedQuizz);
 
-            $.sendMessage('Quizz started!');
+            BotTools.broadcastText($, 'Quizz ' + quizzname + ' started!')
             QuizzService.saveQuizz(quizz);
             return quizz;
         }
@@ -82,7 +82,7 @@ class QuizzService {
                 let msg = 'Valid answer(s):\n' + quizz.currentQuestion.choices
                     .filter((c, i) => question.answers.indexOf(i+1) !== -1)
                     .map((c, i) => '' + (i+1) + ') ' + c).join('\n');
-                $.sendMessage(msg)
+                BotTools.broadcastText($, msg)
         }
     }
 
@@ -96,7 +96,7 @@ class QuizzService {
             } else {
                 quizz.status = 'finished';
                 QuizzService.saveQuizz(quizz);
-                $.sendMessage('Quizz is finished!!');
+                BotTools.broadcastText($, 'Quizz is finished!!');
             }
         }
     }
@@ -106,7 +106,7 @@ class QuizzService {
         if (quizz.status === 'active' && question) {
             let msg = question.label;
             msg += '\n' + quizz.currentQuestion.choices.map((c, i) => '' + (i+1) + ') ' + c).join('\n');
-            $.sendMessage(msg)
+            BotTools.broadcastText($, msg)
         }
     }
 
@@ -121,7 +121,7 @@ class QuizzService {
                 const answers = quizz.currentQuestion.answers;
                 const answerChoice = quizz.currentQuestion.choices[answer - 1];
                 if (answers.indexOf(answer) !== -1) {
-                    $.sendMessage('Congrats @' + BotTools.getUsername($.message) + ', your answer is right: ' + answerChoice)
+                    BotTools.broadcastText($, 'Congrats @' + BotTools.getUsername($.message) + ', your answer is right: ' + answerChoice)
                     setTimeout(function () {
                         QuizzService.loadNextQuestion($, quizz);
                     }, 5000);
@@ -238,6 +238,7 @@ class QuizzController extends TelegramBaseController {
         } else {
             // start new quizz
             quizz = QuizzService.startQuizz($);
+            sleep.sleep(3);
             activesQuizz[$.chatId] = quizz;
         }
         QuizzService.loadNextQuestion($, quizz);
