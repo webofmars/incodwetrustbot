@@ -1,6 +1,6 @@
 {
   "name": "incodwetrustbot",
-  "version": "2.0.0",
+  "version": "2.0.2",
   "homepage": "https://github.com/webofmars/incodwetrustbot",
   "description": "In Cod We Trust is a bewelcome (bewelcome.org) event, taking place in Marseille, France. This bot will interract with the participants for the great photo contest",
   "bugs": {
@@ -14,7 +14,6 @@
     "express": "^4.14",
     "node-gallery": "^1.1",
     "redis": "^2.6",
-    "sleep": "5.1.1",
     "telegram-node-bot": "^3.0",
     "yamljs": "0.3.0"
   },

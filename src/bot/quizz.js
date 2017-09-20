@@ -8,7 +8,6 @@ const SessionsManager = require('../lib/SessionsManager.js');
 const Telegram = require('telegram-node-bot');
 const TelegramBaseController = Telegram.TelegramBaseController
 const YAML = require('yamljs');
-const sleep = require('sleep');
 
 let availablesQuizz = {};
 let activesQuizz = {};
@@ -238,10 +237,11 @@ class QuizzController extends TelegramBaseController {
         } else {
             // start new quizz
             quizz = QuizzService.startQuizz($);
-            sleep.sleep(3);
             activesQuizz[$.chatId] = quizz;
         }
-        QuizzService.loadNextQuestion($, quizz);
+        setTimeout(function () {
+                        QuizzService.loadNextQuestion($, quizz);
+                    }, 5000);
     }
 
     restartQuizz($) {

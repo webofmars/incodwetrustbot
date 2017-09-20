@@ -15,6 +15,6 @@ module.exports = {
     eventGamesPrefix: process.env.EVENT_GAMES_PREFIX || 'http://localhost:3000/games/',
     playlistUrl: process.env.PLAYLIST_URL || 'http://www.deezer.com/',
     admins: admins,
-    version: process.env.VERSION || '2.0.0',
+    version: process.env.VERSION || '2.0.2',
     dlurl: 'https://api.telegram.org/file/bot'
 }
