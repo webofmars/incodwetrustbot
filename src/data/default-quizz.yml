@@ -1,35 +1,148 @@
-q1:
-    questions:
-        - label: En quelle année blablabla?
-          choices: 
-            - 1950
-            - 1984
-            - 1999
-            - 2008
-          answers:
-            - 3
-        - label: De quelle couleur était le cheval noir d'Henri IV?
-          choices: 
-            - blanc
-            - noir
-            - marron
-            - gris
-          answers:
-            - 2
-q2:
-    questions:
-        - label: Combien?
-          choices: 
-            - environ 350
-            - à peu près 500
-            - plus de 800
-          answers:
-            - 3
-        - label: De quelle couleur était le cheval blanc d'Henri IV?
-          choices: 
-            - blanc
-            - noir
-            - marron
-            - gris
-          answers:
-            - 1
+mars1:
+  questions:
+    - label: what has blocked the Marseille harbor once ?
+      choices:
+        - a cod fish
+        - a boat
+        - an octopus
+        - my mother
+      answers:
+        - 2
+    - label: what is the most famous beverage of Marseille ?
+      choices:
+        - pastis
+        - anisette
+        - beer "de la plaine"
+        - water of the harbor
+      answers:
+        - 1
+    - label: from which country the founders of Marseille were originaly from ?
+      choices:
+        - greece
+        - rome empire
+        - celts
+        - vikings
+      answers:
+        - 1
+    - label: whom famous weeding took place in Marseille ?
+      choices:
+        - Marius & Fanny
+        - Groucho & Chico
+        - David & Victoria Beckam
+        - Gyptis & Protis
+      answers:
+        - 4
+    - label: which channel TV (or assimilated) has produced the Marseille TV show ?
+      choices:
+        - TF1
+        - MTS
+        - CBS
+        - Netflix
+      answers:
+        - 4
+    - label: which plague has been introduced in Marseille in the 16th century ?
+      choices:
+        - duck hunt
+        - whistles collection habbit
+        - black plague
+        - black panthers
+      answers:
+        - 3
+    - label: What famous valley, under the bridge of the Fausse-Monnaie, hosts a fishing village ?
+      choices:
+        - sun valley
+        - vallon des Auffes
+        - valley lalala
+        - death valley
+      answers:
+        - 2
+
+mars2:
+  questions:
+    - label: what is not a Marseille's speciality ?
+      choices:
+        - soap
+        - oil
+        - floorcloth
+        - fish
+      answers:
+        - 3
+    - label: what is the name of the famous Marseille soccer club ?
+      choices:
+        - Marseille Football club
+        - Gambas FC
+        - Olympique de Marseille
+        - Tapie, comme au poker - FC
+      answers:
+        - 3
+    - label: in the 1950s, what was the name given to the agreement between drug traffickers ?
+      choices:
+        - French Harbour
+        - French Kiss
+        - French Connection
+        - French Attitude
+      answers:
+        - 3
+    - label: in 2013, what was Marseille European Capital ?
+      choices:
+        - of sculpture
+        - of culture
+        - of peinture
+        - of rupture
+      answers:
+        - 2
+    - label: Chateau d'if was ?
+      choices:
+        - a prison
+        - an hostpital
+        - a port
+        - a retirement home
+      answers:
+        - 1
+    - label: la bouillabaisse is a speciality based of ?
+      choices:
+        - hot water & spicy herbs
+        - rock fishs & hot water
+        - hot water & old rockers
+        - hot waters & turkishmen with mustache
+      answers:
+        - 2
+    - label: What is a "pointu" ?
+      choices:
+        - something sharp
+        - something round
+        - something floatting
+        - something flying
+      answers:
+        - 3
+
+bw1:
+  questions:
+    - label: what is the favorite color of BW ?
+      choices:
+        - light orange
+        - orange is the new black
+        - clockwork orange
+        - blue oranges
+      answers:
+        - 1
+        - 2
+        - 3
+        - 4
+    - label: what is an hospex site about ?
+      choices:
+        - hosting people
+        - sharing experiences
+        - finding love
+        - finding work
+      answers:
+        - 1
+        - 2
+    - label: what you can do to help BW ?
+      choices:
+        - give money
+        - translate some parts of the site
+        - contribute to the wiki
+        - all of above
+      answers:
+        - 4

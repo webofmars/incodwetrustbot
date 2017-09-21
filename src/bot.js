@@ -19,8 +19,6 @@ const Teams = require('./bot/teams.js');
 const TeamsController = Teams.TeamsController;
 const TeamsService = Teams.TeamsService;
 
-const dlurl = 'https://api.telegram.org/file/bot';
-
 const TelegramBaseController = Telegram.TelegramBaseController
 const TelegramBaseInlineQueryController = Telegram.TelegramBaseInlineQueryController
 const TelegramBaseCallbackQueryController = Telegram.TelegramBaseCallbackQueryController
@@ -83,19 +81,20 @@ class HelpController extends TelegramBaseController {
 
   handle($) {
     BotTools.UsersAndSessionsRegister($)
-    $.sendMessage("Usage: \n\
-        /start : start playing with me \n \
-        /help : display help message \n \
-        /ping : check if i'am still alive ;-) \n \
-        /photo : send me a photo \n \
-        /gallery : show me the onlmine photo gallery of the event \n \
-        /scores : show me the event scores \n \
-        /contacts : show me the orgas contact \n \
-        /places : show me the meeting point on a map \n \
-        /programm : send me again the programm document \n \
-        /playlist : send me some good sound of Marseille \n \
-        /version : show the bot version \n \
-        /xxxxxxxx : there is some hidden commands ... find it :-)");
+    $.sendMessage('Usage: \n' +
+      '/start - start playing with me\n'                   +
+      '/help - display help message\n'                     +
+      '/ping - check if i\'am still alive ;-)\n'           +
+      '/programm - send me again the programm document\n'  +
+      '/contacts - show me the orgas contact\n'            +
+      '/places - show me the meeting point on a map\n'     +
+      '/photo - send me a photo\n'                         +
+      '/gallery - show me the onlmine photo gallery of the event\n' +
+      '/teams - show teams & scores\n'                     +
+      '/quizz - show the quizzs commands\n'                +
+      '/version - show the bot version\n'                  +
+      '/xxxxxxxx - there is some hidden commands ... find it :-)\n'
+    )
   }
 }
 
@@ -140,11 +139,11 @@ class GalleryController extends TelegramBaseController {
   }
 }
 
+// FIXME: seems broken - ActiveSessions, UsersDB, SessionManager : need refacto
 class DebugController extends TelegramBaseController {
   handle($) {
     BotTools.UsersAndSessionsRegister($)
-    $.sendMessage('Users    = ' + users.dump())
-    $.sendMessage('Sessions = ' + ActiveSessions.sessions())
+    $.sendMessage('Users    = ' + UsersDB.dump())
   }
 }
 
@@ -162,37 +161,39 @@ class ScoresController extends TelegramBaseController {
         $.sendMessage("*Voici les scores*:\n" + reply.toString().replace(/\{/g, '').replace(/\}/g, '').replace(/:/g, ' : ').replace(/"/g, '').replace(/,/g, "\n"), {
           parse_mode: 'Markdown'
         });
-      }else{
+      } else {
         $.sendMessage("Les scores ne sont pas disponibles.");
       }
     });
   }
-
 }
 
 class ContactsController extends TelegramBaseController {
   handle($) {
     BotTools.UsersAndSessionsRegister($)
-    $.sendContact("+33 6 52 77 53 54", "Frederic")
-    $.sendContact("+33 6 85 53 48 44", "Mary")
-    $.sendContact("+33 6 58 02 07 06", "Orianne")
-    $.sendContact("+33 6 62 68 90 65", "Vincent")
-    $.sendContact("+33 6 58 41 48 86", "Kristell")
+    $.sendContact("+33 6 52 77 53 54", "Frederic | @fredLight | f_like_fire ")
+    $.sendContact("+33 6 58 02 07 06", "Orianne  | @Orianne55 | lifeisadream" )
+    $.sendContact("+33 6 58 41 48 86", "Kristell | @KrisTLG   | krisbw      ")
+    $.sendContact("+33 6 26 35 52 91", "Remy     | @Remy_138  | latchoska   ")
   }
 }
 
 class PlacesController extends TelegramBaseController {
   handle($) {
     BotTools.UsersAndSessionsRegister($)
-    $.sendVenue(43.298829, 5.383786, "Apero @Music Kiosk | " + 'Friday 30th, ' + '18h', '49 allée Léon Gambetta');
+    $.sendVenue(43.2991, 5.3652, "Esplanade de la major | " + 'Friday 22th, ' + '18h30', 'la major');
+    $.sendVenue(43.2991, 5.3652, "Night Urban Exploration | " + 'Friday 22th, ' + '22h', 'la major');
 
-    $.sendVenue(43.286325, 5.383802, 'Hike @Castellane Metro Station | ' + 'Saturday 1st, ' + '9h30', 'Place Castellane')
-    $.sendVenue(43.297334, 5.365755, 'City Tour @Place de Lenche | ' + 'Saturday 1st, ' + '10h', 'Place de lenche')
-    $.sendVenue(43.294700, 5.358056, 'Pic-Nic @Parc du Pharo | ' + 'Saturday 1st, ' + '14h', 'Palais du Pharo')
-    $.sendVenue(43.295284, 5.386855, 'Pub Crawling @Tables de la Plaine | ' + 'Saturday 1st, ' + '19h30', 'Place Jean Jaurès')
+    $.sendVenue(43.3030, 5.3800, 'Hike @McDonald Gare St-Charles | ' + 'Saturday 23th, ' + '9h30', 'Gare Saint Charles')
+    $.sendVenue(43.3048, 5.3660, 'City Tour @Burger King Joliette | ' + 'Saturday 23th, ' + '10h', 'Place de la Joliette')
+    $.sendVenue(43.2948, 5.3742, 'Boat @Ombriere du Vieux-Port | ' + 'Saturday 23th, ' + '10h', 'Ombrière du veiux port')
+    $.sendVenue(43.2928, 5.3588, 'Pic-Nic @Parc du Pharo | ' + 'Saturday 23th, ' + '14h', 'Palais du Pharo')
+    $.sendVenue(43.3604, 5.3145, 'Apero @Estaque | ' + 'Saturday 23th, ' + '14h', 'Estaque')
+    $.sendVenue(43.2925, 5.3725, 'Fadas Night | ' + 'Saturday 1st, ' + '19h30', 'Place aux huiles, Berthom')
 
-    $.sendVenue(43.295793, 5.375202, 'Velo Tour @Place Gabriel Péri | ' + 'Sunday 2nd, ' + '10h30', '1 Rue Reine Elisabeth')
-    $.sendVenue(43.295384, 5.387426, 'Brunch @Brasserie le 31 | ' + 'Sunday 2nd, ' + '11h30', '27 place Jean Jaurès')
+    $.sendVenue(43.2957, 5.3751, 'Velo Tour @Place Gabriel Péri | ' + 'Sunday 24th, ' + '10h', '1 Rue Reine Elisabeth')
+    $.sendVenue(43.2927, 5.3839, 'Grafs hunt @N.D du mont  | ' + 'Sunday 24th, ' + '10h', 'Bio c bon')
+    $.sendVenue(43.2613, 5.3807, 'Pique-Nique @Parc Borely | ' + 'Sunday 24th, ' + '12h30', 'parc borely')
   }
 }
 
@@ -239,8 +240,6 @@ class SetScoreController extends TelegramBaseController {
   }
 }
 
-
-
 class StartGameController extends TelegramBaseController {
 
   handle($) {
@@ -272,11 +271,11 @@ class FunCodController extends TelegramBaseController {
   handle($) {
     console.log('+++ FunCodController')
     BotTools.UsersAndSessionsRegister($)
-    var choice = Math.floor((Math.random() * 3) + 1);
+    var choice = Math.floor((Math.random() * 4) + 1);
     switch (choice) {
       case 1:
         console.log('+ sending photo')
-        $.sendPhoto(InputFile.byUrl('http://lesturgeons.blogs.nouvelobs.com/media/01/00/278174761.jpg', 'cod-styleeee.jpg'))
+        $.sendPhoto(InputFile.byUrl('http://www.hogylures.com/wp-content/uploads/2011/10/Cape-Cod-Cod2-Small.jpg', 'cod-styleeee.jpg'))
         break;
       case 2:
         console.log('+ sending video')
@@ -286,6 +285,9 @@ class FunCodController extends TelegramBaseController {
         console.log('+ sending audio')
         $.sendMessage('http://www.deezer.com/track/540175');
         break;
+      case 4:
+        console.log('+ sending meme')
+        $.sendMessage('https://memegenerator.net/img/instances/500x/80422861/wtf-man-in-cod-we-trust.jpg');
     }
   }
 }
@@ -314,18 +316,17 @@ class PlaylistController extends TelegramBaseController {
 start - start playing with me
 help - display help message
 ping - check if i'am still alive ;-)
-photo - send me a photo
-gallery - show me the onlmine photo gallery of the event
-scores - show me the event scores
+programm - send me again the programm document
 contacts - show me the orgas contact
 places - show me the meeting point on a map
-programm - send me again the programm document
+photo - send me a photo
+gallery - show me the onlmine photo gallery of the event
+teams - show teams & scores
+quizz - show the quizzs commands
 version - show the bot version
 xxxxxxxx - there is some hidden commands ... find it :-)
 */
 BotTools.tg().router
-  .when(['/quizz-restart :quizzname', '/quizz-start :quizzname', '/quizz-skip', '/quizz'], new QuizzController())
-  .when(['/teams-members', '/teams-scores', '/teams-reset', '/teams'], new TeamsController())
   .when([/^\/start$/], new HelpController())
   .when([/^\/help$/], new HelpController())
   .when([/^\/ping$/], new PingController())
@@ -337,12 +338,20 @@ BotTools.tg().router
   .when([/^\/programm$/], new ProgrammController())
   .when([/^\/playlist$/], new PlaylistController())
   .when([/^\/version$/], new VersionController())
+
   // Hidden functions
-  .when([/^\/debug$/], new DebugController())
-  .when(['/scoreset :team :delta'], new SetScoreController())
-  .when(['/gamestart :gameid'], new StartGameController())
+  .when(['/debug'], new DebugController())
+  //.when(['/scoreset :team :delta'], new SetScoreController())
+  //.when(['/gamestart :gameid'], new StartGameController())
   .when([/^\/giligili$/], new FunChatouilleController())
   .when([/^\/cod$/], new FunCodController())
+  .when([
+    '/quizz :action :quizzname',
+    '/quizz :action',
+    '/quizz'], new QuizzController())
+  .when([
+    '/teams :action',
+    '/teams'], new TeamsController())
   .otherwise(new DefaultController())
 
 console.log('Listing for request on Telegram API ...')

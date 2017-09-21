@@ -10,15 +10,22 @@ class UsersDB {
   }
 
   register($) {
-    console.log(JSON.stringify($.message.chat.id))
-    if (!this._regusers[$.message.chat.id]) {
-      console.log("UsersDB: adding " + $.message.from.username + "(" + $.message.from.id + ")")
-      this._regusers[$.message.chat.id] = { user: $.message.from }
+    const userid = $.message.chat.id.toString();
+    const username = $.message.from.username.toString();
+    const from = JSON.stringify($.message.from);
+
+    console.log('UsersDB.register: userid: ' + userid)
+    console.log('UsersDB.register: username: ' + username)
+    console.log('UsersDB.register: from: ' + from)
+
+    if (!this._regusers[userid]) {
+      console.log("UsersDB: adding " + username + "(" + userid + ")")
+      this._regusers[userid] = { 'user': from }
     }
     return true
   }
 
-  dump() {
+  static dump() {
     return(JSON.stringify(this._regusers))
   }
 

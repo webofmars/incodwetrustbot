@@ -1,10 +1,10 @@
 const Config = require('./Config.js');
 const SessionsManager = require('./SessionsManager.js');
 const UsersDB = require('./UsersDB.js');
-
 const dl = require('download-file');
 const Telegram = require('telegram-node-bot');
 const redisdb = require('./redisdb');
+const InputFile = Telegram.InputFile
 
 /* -----------------------------------------------------------------------------
  * Class with static functions used by the bot itself
@@ -13,10 +13,8 @@ const redisdb = require('./redisdb');
 var ActiveSessions = new SessionsManager();
 
 console.log('Load BotTools');
-
 console.log("INFO: " + JSON.stringify(process.versions));
 console.dir("INFO: TG BOT TOKEN: " + Config.TGtoken)
-
 
 var tg = new Telegram.Telegram(Config.TGtoken);
 var users = new UsersDB();
@@ -27,6 +25,7 @@ class BotTools {
     static tg() {
         return tg;
     }
+
     static scores() {
         return scores;
     }
@@ -89,15 +88,15 @@ class BotTools {
         console.log('  width: ' + daPhoto.width)
         tg.api.getFile(daPhoto.fileId).then(
             function (daFile) {
-                var url = dlurl + TGtoken + '/' + daFile.filePath
+                var url = Config.dlurl + Config.TGtoken + '/' + daFile.filePath
                 var ext = /\..*$/.exec(daFile.filePath)
                 var filename = /[^\/]+$/.exec(daFile.filePath)
-                var photopath = photodir + '/' + username + '/' + filename
+                var photopath = Config.photodir + '/' + username + '/' + filename
                 var photourlpath = '/' + BotTools.getUsername($.message) + '/photo/' + /^(.*)\..*$/.exec(filename)[1]
-                var photourl = galleryUrl + photourlpath
+                var photourl = Config.galleryUrl + photourlpath
                 console.log('    Downloading ' + url + '...')
                 dl(url, {
-                        directory: photodir + '/' + username,
+                        directory: Config.photodir + '/' + username,
                         filename: filename
                     },
                     function (err) {
