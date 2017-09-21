@@ -175,22 +175,25 @@ class ContactsController extends TelegramBaseController {
     $.sendContact("+33 6 58 02 07 06", "Orianne  | @Orianne55 | lifeisadream" )
     $.sendContact("+33 6 58 41 48 86", "Kristell | @KrisTLG   | krisbw      ")
     $.sendContact("+33 6 26 35 52 91", "Remy     | @Remy_138  | latchoska   ")
-    $.sendContact("+33 6 13 87 96 74", "Fanny    | @FanitaP   | fanita      ")
   }
 }
 
 class PlacesController extends TelegramBaseController {
   handle($) {
     BotTools.UsersAndSessionsRegister($)
-    $.sendVenue(43.298829, 5.383786, "Apero @Music Kiosk | " + 'Friday 30th, ' + '18h', '49 allée Léon Gambetta');
+    $.sendVenue(43.2991, 5.3652, "Esplanade de la major | " + 'Friday 22th, ' + '18h30', 'la major');
+    $.sendVenue(43.2991, 5.3652, "Night Urban Exploration | " + 'Friday 22th, ' + '22h', 'la major');
 
-    $.sendVenue(43.286325, 5.383802, 'Hike @Castellane Metro Station | ' + 'Saturday 1st, ' + '9h30', 'Place Castellane')
-    $.sendVenue(43.297334, 5.365755, 'City Tour @Place de Lenche | ' + 'Saturday 1st, ' + '10h', 'Place de lenche')
-    $.sendVenue(43.294700, 5.358056, 'Pic-Nic @Parc du Pharo | ' + 'Saturday 1st, ' + '14h', 'Palais du Pharo')
-    $.sendVenue(43.295284, 5.386855, 'Pub Crawling @Tables de la Plaine | ' + 'Saturday 1st, ' + '19h30', 'Place Jean Jaurès')
+    $.sendVenue(43.3030, 5.3800, 'Hike @McDonald Gare St-Charles | ' + 'Saturday 23th, ' + '9h30', 'Gare Saint Charles')
+    $.sendVenue(43.3048, 5.3660, 'City Tour @Burger King Joliette | ' + 'Saturday 23th, ' + '10h', 'Place de la Joliette')
+    $.sendVenue(43.2948, 5.3742, 'Boat @Ombriere du Vieux-Port | ' + 'Saturday 23th, ' + '10h', 'Ombrière du veiux port')
+    $.sendVenue(43.2928, 5.3588, 'Pic-Nic @Parc du Pharo | ' + 'Saturday 23th, ' + '14h', 'Palais du Pharo')
+    $.sendVenue(43.3604, 5.3145, 'Apero @Estaque | ' + 'Saturday 23th, ' + '14h', 'Estaque')
+    $.sendVenue(43.2925, 5.3725, 'Fadas Night | ' + 'Saturday 1st, ' + '19h30', 'Place aux huiles, Berthom')
 
-    $.sendVenue(43.295793, 5.375202, 'Velo Tour @Place Gabriel Péri | ' + 'Sunday 2nd, ' + '10h30', '1 Rue Reine Elisabeth')
-    $.sendVenue(43.295384, 5.387426, 'Brunch @Brasserie le 31 | ' + 'Sunday 2nd, ' + '11h30', '27 place Jean Jaurès')
+    $.sendVenue(43.2957, 5.3751, 'Velo Tour @Place Gabriel Péri | ' + 'Sunday 24th, ' + '10h', '1 Rue Reine Elisabeth')
+    $.sendVenue(43.2927, 5.3839, 'Grafs hunt @N.D du mont  | ' + 'Sunday 24th, ' + '10h', 'Bio c bon')
+    $.sendVenue(43.2613, 5.3807, 'Pique-Nique @Parc Borely | ' + 'Sunday 24th, ' + '12h30', 'parc borely')
   }
 }
 
