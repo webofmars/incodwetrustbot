@@ -134,7 +134,7 @@ class QuizzService {
     }
 
     static getQuizz($) {
-        const quizz = activesQuizz[$.chatId];
+        const quizz = activesQuizz['current-quizz'];
         console.log('=> Quizz:', quizz);
         return quizz;
     }
@@ -237,7 +237,7 @@ class QuizzController extends TelegramBaseController {
         } else {
             // start new quizz
             quizz = QuizzService.startQuizz($);
-            activesQuizz[$.chatId] = quizz;
+            activesQuizz['current-quizz'] = quizz;
         }
         setTimeout(function () {
                         QuizzService.loadNextQuestion($, quizz);
@@ -253,7 +253,7 @@ class QuizzController extends TelegramBaseController {
 
         // restart a new quizz
         const quizz = QuizzService.startQuizz($);
-        activesQuizz[$.chatId] = quizz;
+        activesQuizz['current-quizz'] = quizz;
         QuizzService.loadNextQuestion($, quizz);
     }
 }
